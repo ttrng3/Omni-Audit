@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ecosystem Audit</title>
 <style>
   :root{
@@ -63,28 +67,30 @@
     .bar{border-color:#222}
   }
 </style>
+</head>
+<body>
 <div class="wrap">
   <header class="mast">
-    <p class="kick">Ecosystem Audit &middot; Claude Workspace</p>
+    <p class="kick">Ecosystem Audit &middot; Claude Workspace workspace</p>
     <h1>Ecosystem Health Scoreboard</h1>
     <p class="stand">Monthly integrity sweep of the workspace — census through the Google Drive API, kernel-vs-memory drift check, secret scan, and a four-pillar score. This is a sanitised public scoreboard; the full private record lives on Drive.</p>
-    <p class="meta num">Run 2026-09-12 &middot; transport: Drive API (cloud-only) &middot; scope: full tree</p>
+    <p class="meta num">Run 2026-09-09 &middot; transport: Drive API (cloud-only) &middot; scope: full tree</p>
   </header>
 
   <section class="grid hero">
     <div class="card">
       <p class="lab">Overall score</p>
       <div class="score-big num">61<small>/100</small></div>
-      <p class="delta">Flat vs last run &middot; Migration Integrity Index <strong class="num">60</strong>/100</p>
+      <p class="delta">Migration Integrity Index <strong class="num">59</strong>/100</p>
     </div>
     <div class="card">
       <p class="lab">Kernel drift check</p>
       <div style="margin:6px 0 10px"><span class="pill pass">PASS &middot; CLEAR</span></div>
-      <p class="delta">Kernel and memory floor agree on the rule set. Tracked stale labels open (naming line; workspace path label).</p>
+      <p class="delta">Kernel and memory floor agree on rule set. One tracked deferred kernel write open (naming line).</p>
     </div>
     <div class="card">
       <p class="lab">Secret / credential scan</p>
-      <div style="margin:6px 0 10px"><span class="pill fail">FAIL &middot; 3 flagged</span></div>
+      <div style="margin:6px 0 10px"><span class="pill fail">FAIL &middot; 4 flagged</span></div>
       <p class="delta">Credential-bearing files present in the tree. See private record for remediation.</p>
     </div>
   </section>
@@ -96,21 +102,21 @@
       <tbody>
         <tr><td><span class="rag r-amber"></span>Redundancy &amp; Fragmentation</td><td><span class="tag amber">Amber</span></td><td class="v">17 / 25</td></tr>
         <tr><td><span class="rag r-amber"></span>Cross-Pollination Density</td><td><span class="tag amber">Amber</span></td><td class="v">14 / 25</td></tr>
-        <tr><td><span class="rag r-amber"></span>Actionability &amp; Alignment</td><td><span class="tag amber">Amber</span></td><td class="v">16 / 25</td></tr>
-        <tr><td><span class="rag r-amber"></span>Architecture Integrity</td><td><span class="tag amber">Amber</span></td><td class="v">14 / 25</td></tr>
+        <tr><td><span class="rag r-amber"></span>Actionability &amp; Alignment</td><td><span class="tag amber">Amber</span></td><td class="v">17 / 25</td></tr>
+        <tr><td><span class="rag r-red"></span>Architecture Integrity</td><td><span class="tag red">Red</span></td><td class="v">13 / 25</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="legend">RAG: <span class="tag green">Green</span> &ge;20 &nbsp; <span class="tag amber">Amber</span> 14&ndash;19 &nbsp; <span class="tag red">Red</span> &lt;14. The drag this run is Cross-Pollination — knowledge-base synthesis is still thin (raw intake far outweighs synthesised notes). No pillar in the red; all four sit amber.</p>
+  <p class="legend">RAG: <span class="tag green">Green</span> &ge;20 &nbsp; <span class="tag amber">Amber</span> 14&ndash;19 &nbsp; <span class="tag red">Red</span> &lt;14. Architecture Integrity is the drag this run — credential exposure plus unresolved data-loss stubs.</p>
 
   <h2 class="sec">Workspace at a glance</h2>
   <div class="grid counts">
-    <div class="card"><p class="lab">Files scanned (active)</p><div class="stat num">3,004</div><p class="delta">this run</p></div>
-    <div class="card"><p class="lab">Folders scanned</p><div class="stat num">237</div></div>
-    <div class="card"><p class="lab">Scanned size</p><div class="stat num">15.8<small> GB</small></div></div>
+    <div class="card"><p class="lab">Files scanned (active)</p><div class="stat num">4,000</div></div>
+    <div class="card"><p class="lab">Folders (active)</p><div class="stat num">345</div></div>
+    <div class="card"><p class="lab">Workspace size</p><div class="stat num">18.8<small> GB</small></div></div>
     <div class="card"><p class="lab">Numbered projects</p><div class="stat num">18</div></div>
-    <div class="card"><p class="lab">Published artifacts</p><div class="stat num">9</div></div>
-    <div class="card"><p class="lab">Scheduled tasks (enabled)</p><div class="stat num">7</div><p class="delta">all cloud-only</p></div>
+    <div class="card"><p class="lab">Published artifacts</p><div class="stat num">5</div></div>
+    <div class="card"><p class="lab">Scheduled tasks (enabled)</p><div class="stat num">9</div><p class="delta">all cloud-only</p></div>
     <div class="card"><p class="lab">Google-native stubs</p><div class="stat num">12</div><p class="delta">data-loss risk</p></div>
     <div class="card"><p class="lab">Empty control folders</p><div class="stat num">2</div><p class="delta">Legal &middot; Backups</p></div>
   </div>
@@ -118,17 +124,17 @@
   <h2 class="sec">Score trend</h2>
   <div class="trend">
     <div class="barwrap" style="flex:1"><div class="bar muted" style="height:96px"><div class="fill" style="height:0%"></div></div><div class="barlab">09-08<br>baseline</div></div>
+    <div class="barwrap" style="flex:1"><div class="bar" style="height:96px"><div class="fill" style="height:68%"></div></div><div class="barlab">09-09<br>68*</div></div>
     <div class="barwrap" style="flex:1"><div class="bar" style="height:96px"><div class="fill" style="height:61%"></div></div><div class="barlab">09-09<br>61</div></div>
-    <div class="barwrap" style="flex:1"><div class="bar" style="height:96px"><div class="fill" style="height:61%"></div></div><div class="barlab">09-12<br>61</div></div>
   </div>
-  <p class="legend">Baseline (09-08) was structural only, not scored. Two comparable scored runs follow (09-09 and 09-12), both persisted to the create-only history — flat at 61. Secrets remain the standing exposure; knowledge-base synthesis remains the standing drag.</p>
+  <p class="legend">Baseline (09-08) was structural only, not scored. The 09-09 interactive pass reported 68* but was not persisted to the record and used a different measurement basis, so the comparison is indicative only. This run (61) is the first scored entry persisted to the create-only history. The gap is driven mainly by the secret-scan finding.</p>
 
   <div class="note">Sanitised scoreboard. It carries only the score, per-pillar RAG, trend, plain counts, drift PASS/FAIL and the secret-scan count + PASS/FAIL. It never carries a secret value or path, a file or folder listing, a person's name, or any private financial detail — those stay in the private <code>.md</code> record on Drive.</div>
 
   <footer>
-    Ecosystem Audit &middot; generated 2026-09-12 &middot; Drive-API census, cloud-only &middot; drift: PASS &middot; secret scan: FAIL (3)<br>
-    Private record: <code>93 Knowledge Base/Claude outputs/</code> &middot; scoreboard mirror: <code>Claude outputs/AUDIT/index.html</code>
+    Ecosystem Audit &middot; generated 2026-09-09 &middot; Drive-API census, cloud-only &middot; drift: PASS &middot; secret scan: FAIL (4)<br>
+    Private record: <code>93 Knowledge Base/Claude outputs/</code> &middot; scoreboard mirror: <code>Claude outputs/Monthly Audit/index.html</code>
   </footer>
 </div>
-
-</body></html>
+</body>
+</html>
