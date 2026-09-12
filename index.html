@@ -1,0 +1,134 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ecosystem Audit</title>
+<style>
+  :root{
+    --paper:#FFFFFF; --surface:#FAFAF8; --sunk:#F3F3EF; --ink:#1C1C1A;
+    --ink-soft:#44443F; --muted:#6B6B64; --rule:#E4E4DF; --accent:#0F6E52;
+    --accent-bg:#EAF3EF; --critical:#B02418; --warning:#9A6B00;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding:40px 24px 64px}
+  .num{font-variant-numeric:tabular-nums}
+  header.mast{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:28px}
+  .kick{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+  h1{font-size:30px;line-height:1.1;margin:0 0 6px;font-weight:650}
+  .stand{color:var(--ink-soft);font-size:15px;margin:8px 0 0;max-width:64ch}
+  .meta{color:var(--muted);font-size:12.5px;margin-top:12px}
+  .grid{display:grid;gap:16px}
+  .hero{grid-template-columns:1.1fr 1fr 1fr;margin-bottom:24px}
+  @media(max-width:720px){.hero{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:18px 20px}
+  .card .lab{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .score-big{font-size:52px;font-weight:680;line-height:1;color:var(--accent)}
+  .score-big small{font-size:20px;color:var(--muted);font-weight:500}
+  .delta{font-size:13px;color:var(--ink-soft);margin-top:8px}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid}
+  .pass{color:var(--accent);border-color:var(--accent);background:var(--accent-bg)}
+  .fail{color:var(--critical);border-color:var(--critical);background:#F7E9E7}
+  .stat{font-size:30px;font-weight:640;line-height:1}
+  .stat small{font-size:14px;color:var(--muted);font-weight:500}
+  h2.sec{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    margin:32px 0 14px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  .scroll{overflow-x:auto}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule)}
+  th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  td.v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+  .rag{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  .r-green{background:var(--accent)} .r-amber{background:var(--warning)} .r-red{background:var(--critical)}
+  .tag{font-size:12px;font-weight:600}
+  .tag.green{color:var(--accent)} .tag.amber{color:var(--warning)} .tag.red{color:var(--critical)}
+  .counts{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:720px){.counts{grid-template-columns:repeat(2,1fr)}}
+  .trend{display:flex;gap:0;align-items:flex-end;height:96px;margin-top:6px}
+  .bar{flex:1;margin:0 6px;background:var(--accent-bg);border:1px solid var(--rule);border-bottom:none;
+    display:flex;flex-direction:column;justify-content:flex-end;position:relative;border-radius:4px 4px 0 0}
+  .bar .fill{background:var(--accent);border-radius:3px 3px 0 0}
+  .bar.muted .fill{background:var(--muted)}
+  .barwrap{text-align:center}
+  .barlab{font-size:11px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+  .legend{font-size:12px;color:var(--muted);margin-top:10px}
+  footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--muted)}
+  .note{font-size:12.5px;color:var(--ink-soft);background:var(--sunk);border:1px solid var(--rule);
+    border-radius:8px;padding:12px 14px;margin-top:14px}
+  @media print{
+    body{background:#fff}
+    .card,.note{background:#fff}
+    .r-green,.r-amber,.r-red,.bar .fill,.bar{background:#fff!important}
+    :root{--muted:#222;--ink-soft:#222}
+    .card,.hero .card,table,section{break-inside:avoid}
+    .bar{border-color:#222}
+  }
+</style>
+<div class="wrap">
+  <header class="mast">
+    <p class="kick">Ecosystem Audit &middot; Claude Workspace</p>
+    <h1>Ecosystem Health Scoreboard</h1>
+    <p class="stand">Monthly integrity sweep of the workspace — census through the Google Drive API, kernel-vs-memory drift check, secret scan, and a four-pillar score. This is a sanitised public scoreboard; the full private record lives on Drive.</p>
+    <p class="meta num">Run 2026-09-12 &middot; transport: Drive API (cloud-only) &middot; scope: full tree</p>
+  </header>
+
+  <section class="grid hero">
+    <div class="card">
+      <p class="lab">Overall score</p>
+      <div class="score-big num">61<small>/100</small></div>
+      <p class="delta">Flat vs last run &middot; Migration Integrity Index <strong class="num">60</strong>/100</p>
+    </div>
+    <div class="card">
+      <p class="lab">Kernel drift check</p>
+      <div style="margin:6px 0 10px"><span class="pill pass">PASS &middot; CLEAR</span></div>
+      <p class="delta">Kernel and memory floor agree on the rule set. Tracked stale labels open (naming line; workspace path label).</p>
+    </div>
+    <div class="card">
+      <p class="lab">Secret / credential scan</p>
+      <div style="margin:6px 0 10px"><span class="pill fail">FAIL &middot; 3 flagged</span></div>
+      <p class="delta">Credential-bearing files present in the tree. See private record for remediation.</p>
+    </div>
+  </section>
+
+  <h2 class="sec">Four pillars &middot; 25 points each</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Pillar</th><th>Status</th><th class="v">Score</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rag r-amber"></span>Redundancy &amp; Fragmentation</td><td><span class="tag amber">Amber</span></td><td class="v">17 / 25</td></tr>
+        <tr><td><span class="rag r-amber"></span>Cross-Pollination Density</td><td><span class="tag amber">Amber</span></td><td class="v">14 / 25</td></tr>
+        <tr><td><span class="rag r-amber"></span>Actionability &amp; Alignment</td><td><span class="tag amber">Amber</span></td><td class="v">16 / 25</td></tr>
+        <tr><td><span class="rag r-amber"></span>Architecture Integrity</td><td><span class="tag amber">Amber</span></td><td class="v">14 / 25</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="legend">RAG: <span class="tag green">Green</span> &ge;20 &nbsp; <span class="tag amber">Amber</span> 14&ndash;19 &nbsp; <span class="tag red">Red</span> &lt;14. The drag this run is Cross-Pollination — knowledge-base synthesis is still thin (raw intake far outweighs synthesised notes). No pillar in the red; all four sit amber.</p>
+
+  <h2 class="sec">Workspace at a glance</h2>
+  <div class="grid counts">
+    <div class="card"><p class="lab">Files scanned (active)</p><div class="stat num">3,004</div><p class="delta">this run</p></div>
+    <div class="card"><p class="lab">Folders scanned</p><div class="stat num">237</div></div>
+    <div class="card"><p class="lab">Scanned size</p><div class="stat num">15.8<small> GB</small></div></div>
+    <div class="card"><p class="lab">Numbered projects</p><div class="stat num">18</div></div>
+    <div class="card"><p class="lab">Published artifacts</p><div class="stat num">9</div></div>
+    <div class="card"><p class="lab">Scheduled tasks (enabled)</p><div class="stat num">7</div><p class="delta">all cloud-only</p></div>
+    <div class="card"><p class="lab">Google-native stubs</p><div class="stat num">12</div><p class="delta">data-loss risk</p></div>
+    <div class="card"><p class="lab">Empty control folders</p><div class="stat num">2</div><p class="delta">Legal &middot; Backups</p></div>
+  </div>
+
+  <h2 class="sec">Score trend</h2>
+  <div class="trend">
+    <div class="barwrap" style="flex:1"><div class="bar muted" style="height:96px"><div class="fill" style="height:0%"></div></div><div class="barlab">09-08<br>baseline</div></div>
+    <div class="barwrap" style="flex:1"><div class="bar" style="height:96px"><div class="fill" style="height:61%"></div></div><div class="barlab">09-09<br>61</div></div>
+    <div class="barwrap" style="flex:1"><div class="bar" style="height:96px"><div class="fill" style="height:61%"></div></div><div class="barlab">09-12<br>61</div></div>
+  </div>
+  <p class="legend">Baseline (09-08) was structural only, not scored. Two comparable scored runs follow (09-09 and 09-12), both persisted to the create-only history — flat at 61. Secrets remain the standing exposure; knowledge-base synthesis remains the standing drag.</p>
+
+  <div class="note">Sanitised scoreboard. It carries only the score, per-pillar RAG, trend, plain counts, drift PASS/FAIL and the secret-scan count + PASS/FAIL. It never carries a secret value or path, a file or folder listing, a person's name, or any private financial detail — those stay in the private <code>.md</code> record on Drive.</div>
+
+  <footer>
+    Ecosystem Audit &middot; generated 2026-09-12 &middot; Drive-API census, cloud-only &middot; drift: PASS &middot; secret scan: FAIL (3)<br>
+    Private record: <code>93 Knowledge Base/Claude outputs/</code> &middot; scoreboard mirror: <code>Claude outputs/AUDIT/index.html</code>
+  </footer>
+</div>
+
+</body></html>
