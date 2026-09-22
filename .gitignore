@@ -1,0 +1,12 @@
+# Never commit credentials. The monthly job authenticates through the GitHub
+# MCP tools its cloud session is given — there is no token in this tree, and
+# none should ever be added to it. See docs/audit-refresh.md.
+.github-token
+.github-token.save
+*.save
+*.token
+
+.DS_Store
+thumbnail.png
+versions/
+debug.jsonl
