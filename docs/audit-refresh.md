@@ -10,19 +10,41 @@ Canonical. The routine prompt points here; where they disagree, this file wins.
 The GitHub page is never downstream of an artifact or a Drive handoff. The
 routine measures, scores, and writes JSON into this repo. Pages serves it.
 
-## What was wrong before 2026-09-22
+## Who produces, who publishes
 
-Two separate faults, and together they made a dead dashboard look alive.
+**The producer is Ty's scheduled task "Monthly Ecosystem Audit (cloud, v3.x
+resolver)"**, monthly on the 1st. It censuses the workspace, scores the four
+pillars, and writes its output to Google Drive
+`93 Knowledge Base/Claude outputs/Audit/` (folderId
+`1XJfVOVQyzZGFKC3au35TtMDDbcoEZe4-`) as `index.html` plus a dated
+`<YYMMDD>_SYS_Audit_Ecosystem-Delta*.md`. **Nothing in this repo should ever
+recompute a score.**
 
-1. **No producer.** The only routine, confusingly named "Monthly Audit", was a
-   *mirror* — its own prompt opens "You are the Audit GitHub mirror … You do
-   NOT run the audit". It copied a Drive handoff that nothing regenerated. The
-   audit that produced run 12-09 was not on any schedule.
-2. **The mirror faked freshness.** It committed weekly as
-   `publish audit scoreboard <date> (cloud mirror)`. The 09-14 and 09-21
-   commits changed whitespace and one `</sub>` → `</div>` typo and nothing
-   else. Score stayed 61 because it was literally the same run. All three
-   `archive/status_*.html` files were copies of run 12-09.
+The routine attached to this repo is a **publisher only**. It carries the
+producer's handoff into `data/`. It never censuses, never scores, never invents
+a finding.
+
+### Correction, 2026-09-22
+
+An earlier version of this file claimed there was **no producer at all** and
+that the audit "was not on any schedule". That was wrong. The producer exists;
+it lives on the Scheduled-tasks surface, and it was missed because
+`RemoteTrigger list` returns only 20 rows with `has_more: true` and ignores its
+cursor. Do not trust a single page of that listing as a complete inventory.
+
+A routine was briefly created here that ran its own census. It has been
+converted to a publisher. If you ever find two things scoring this dashboard,
+the publisher is the one that must yield.
+
+## What was actually wrong before 2026-09-22
+
+The old "Monthly Audit" routine was a *mirror* — its own prompt opens "You are
+the Audit GitHub mirror … You do NOT run the audit" — and it **faked
+freshness**. It committed weekly as `publish audit scoreboard <date> (cloud
+mirror)`, but the 09-14 and 09-21 commits changed whitespace and one
+`</sub>` → `</div>` typo and nothing else. The score stayed 61 because it was
+literally the same run, and all three `archive/status_*.html` files were copies
+of run 12-09.
 
 The old watchdog watched `index.html`'s commit age, so it saw fresh commits and
 reported healthy. Ten days of staleness were invisible.
