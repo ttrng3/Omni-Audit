@@ -99,3 +99,34 @@ given. There is no PAT in this tree and the old Drive fallback
 The repo is `ttrng3/Omni-Audit` and the site is
 https://ttrng3.github.io/Omni-Audit/ — capital O and A. The lowercase Pages URL
 404s.
+
+## Artifact mirror
+
+The chain is **repo-first**, the same shape the other dashboards use:
+
+    schedule → cloud routine → source → GitHub → Pages → artifact mirrored after
+
+**The repo is the source of truth and Pages is the live surface.** The artifact
+at https://claude.ai/artifact/5zwBuMhVEGatBQdqR8s6aZ is a **mirror**, published *after* the repo
+is correct, and it is never authoritative. If the two disagree, the repo wins
+and the artifact is what gets corrected.
+
+Order, every refresh:
+
+1. Write and verify the repo first. Do not touch the artifact until `main` has
+   moved and you have read the commit back.
+2. Publish the changed data paths — `data/index.json` and the new
+   `data/runs/<date>.json` — with the artifact's `url` set. Files you omit are
+   kept, so a refresh is a small write. `tools/reconcile.py` diffs this repo's
+   `data/` against the artifact's copy and says which side is newer.
+3. Publish the page with `tools/build-fragment.py` output, never `index.html`
+   itself — the artifact service wraps what you give it, so a complete document
+   nests inside another, the inner `<head>` is discarded, and the page renders
+   **blank with no console error**. Read the artifact's `index.html` back and
+   count `<html>` tags to check: two means it nested.
+4. **A failed mirror must never make you undo or retry the repo write.** Report
+   it and stop; the site is already correct.
+
+On 2026-09-23 the TMDV artifact was found *ahead* of its repo and the ECOPM one
+a whole renderer generation *behind*, neither caught by the freshness guards.
+Repo-first ordering is what keeps that from recurring.
