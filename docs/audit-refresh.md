@@ -118,9 +118,7 @@ of this page if it is ever needed; nothing in the refresh calls it.
 `index.html` is hand-written, not generated; its CSS lives inline there. Since
 2026-09-24 it follows the `apple-design` skill (which replaced
 ty-artifact-standard): HIG light tokens in the base sheet, then a
-`<style id="apple-layer">` that adds **dark mode (screen-only; print stays
-light)**, card/float shadows, press feedback and the contrast/motion queries.
-Ty chose full Apple including dark mode. Do not revert to light-only or the old
-warm palette. Run HTML in `data/runs/*.json` must style itself with the page's
+`<style id="apple-layer">` that adds card/float shadows, press feedback and the
+contrast/motion queries. **Light only — Ty ruled 2026-09-24** (dark mode ran for one morning and was withdrawn): the page stays light whatever the viewer's system setting, and there is no dark theme. Do not add one back. Do not revert to the old warm palette either. Run HTML in `data/runs/*.json` must style itself with the page's
 tokens (`var(--accent)`, `--warning`, `--critical`, `--ink`, `--muted`,
-`--rule`, …), never raw hex, or it will not follow dark mode.
+`--rule`, …), never raw hex, so the page stays on one palette.
