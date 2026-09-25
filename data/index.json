@@ -1,8 +1,19 @@
 {
- "generatedUtc": "2026-09-12T00:00:00Z",
- "asof": "2026-09-12",
- "current": "2026-09-12",
+ "generatedUtc": "2026-09-25T03:54:54Z",
+ "asof": "2026-09-25",
+ "current": "2026-09-25",
  "runs": [
+  {
+   "id": "2026-09-25",
+   "label": "Sep 2026 · run 25-09",
+   "score": 62,
+   "pillars": {
+    "redundancy": 17,
+    "crossPollination": 14,
+    "actionability": 16,
+    "architecture": 15
+   }
+  },
   {
    "id": "2026-09-12",
    "label": "Sep 2026 · run 12-09",
@@ -17,5 +28,5 @@
  ],
  "pages": "https://ttrng3.github.io/Omni-Audit/",
  "repo": "https://github.com/ttrng3/Omni-Audit",
- "sourceModifiedTime": "2026-09-12T10:06:02Z"
+ "sourceModifiedTime": "2026-09-25T03:54:54Z"
 }
