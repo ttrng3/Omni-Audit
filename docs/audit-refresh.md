@@ -49,16 +49,26 @@ of run 12-09.
 The old watchdog watched `index.html`'s commit age, so it saw fresh commits and
 reported healthy. Ten days of staleness were invisible.
 
-## Cadence
+## Cadence and who publishes
 
-Since 2026-09-25 the publisher runs **once a month, on the 1st at 09:00 UTC**
-(16:00 Asia/Saigon), six hours behind the producer, which starts at 03:00 UTC
-the same day and now also runs the KB monthly update in the same session.
-Before that it ran every Monday at 04:00 UTC; 48 of 52 runs a year reported
-"no new audit", and Ty asked for fewer reports. The freshness watchdog allows a
-run gap of 35 days (`MAX_RUN_AGE_DAYS`), so one missed month trips it. If the
-1st run finds no new audit because the producer was still running, re-run the
-publisher by hand from claude.ai/code/routines.
+Since 2026-09-25 the scoreboard is published **by the producer itself**: the
+routine "Monthly system run — Audit, publish scoreboard, KB update (cloud,
+1st)" fires on the 1st at 03:00 UTC, scores in Part A, and in Part B carries
+its own `Audit/index.html` handoff into this repo with exactly the guards,
+sanitisation and write rules below. Publishing therefore never waits on a
+clock — it happens the moment the audit exists.
+
+The standalone publisher routine is now a **fallback on the 2nd at 01:00 UTC**
+(08:00 Asia/Saigon), 22 hours behind the producer's start. In the normal month
+it finds the handoff already published and reports one line. It exists for the
+month in which Part B fails. Why 22 hours: measured 2026-09-25, the audit alone
+took between 35 minutes and 5 hours, and the KB part up to a day, so no fixed
+same-day slot was safe. Before 2026-09-25 the publisher ran every Monday at
+04:00 UTC and reported "no new audit" 48 times a year.
+
+The freshness watchdog allows a run gap of 35 days (`MAX_RUN_AGE_DAYS`); the
+producer's Part B and the fallback both write `data/.last-check`, so it moves
+at least once a month and one missed month trips it.
 
 ## What the routine may write
 
