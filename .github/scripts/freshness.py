@@ -14,7 +14,7 @@ import os
 import pathlib
 import re
 
-RUN_MAX = int(os.environ.get("MAX_RUN_AGE_DAYS", "10"))
+RUN_MAX = int(os.environ.get("MAX_RUN_AGE_DAYS", "35"))
 DATA_MAX = int(os.environ.get("MAX_DATA_AGE_DAYS", "45"))
 NOW = dt.datetime.now(dt.timezone.utc)
 

@@ -49,6 +49,17 @@ of run 12-09.
 The old watchdog watched `index.html`'s commit age, so it saw fresh commits and
 reported healthy. Ten days of staleness were invisible.
 
+## Cadence
+
+Since 2026-09-25 the publisher runs **once a month, on the 1st at 09:00 UTC**
+(16:00 Asia/Saigon), six hours behind the producer, which starts at 03:00 UTC
+the same day and now also runs the KB monthly update in the same session.
+Before that it ran every Monday at 04:00 UTC; 48 of 52 runs a year reported
+"no new audit", and Ty asked for fewer reports. The freshness watchdog allows a
+run gap of 35 days (`MAX_RUN_AGE_DAYS`), so one missed month trips it. If the
+1st run finds no new audit because the producer was still running, re-run the
+publisher by hand from claude.ai/code/routines.
+
 ## What the routine may write
 
     data/.last-check              every run, including quiet ones

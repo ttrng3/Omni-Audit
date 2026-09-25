@@ -1,7 +1,7 @@
 name: Data freshness check
 
 # The dashboard's failure mode has never been a crash — it is silence. The
-# weekly refresh simply stops running and the page keeps serving old numbers
+# monthly publish (1st of the month) simply stops running and the page keeps serving old numbers
 # with a confident face. This job opens a GitHub issue when data/index.json
 # stops being updated, so a missed refresh is visible instead of invisible.
 on:
@@ -14,7 +14,7 @@ permissions:
   issues: write
 
 env:
-  MAX_RUN_AGE_DAYS: 10
+  MAX_RUN_AGE_DAYS: 35   # publisher runs on the 1st only since 2026-09-25; one missed month trips this
   MAX_DATA_AGE_DAYS: 45
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
             "\`data/index.json\` was last generated **${{ steps.age.outputs.generated }}** (${{ steps.age.outputs.days }} days ago)." \
             "Latest week published: **${{ steps.age.outputs.week }}**." \
             "" \
-            "The weekly refresh has not run. Check the scheduled routine, then re-run it." \
+            "The monthly publisher (1st of the month, 09:00 UTC) has not run. Check the scheduled routine, then re-run it." \
             "Thresholds: run ${MAX_RUN_AGE_DAYS}d, data ${MAX_DATA_AGE_DAYS}d.")
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
