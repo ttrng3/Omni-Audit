@@ -121,18 +121,27 @@ The repo is `ttrng3/Omni-Audit` and the site is
 https://ttrng3.github.io/Omni-Audit/ — capital O and A. The lowercase Pages URL
 404s.
 
-## One surface, on purpose
+## One address, one preview
 
-    schedule → cloud routine → source → GitHub → Pages
+    schedule → cloud routine → source → GitHub → Pages (the address) → artifact (Cowork preview)
 
-**GitHub Pages is the only published surface.** Ty ruled on 2026-09-23 that he
-wants control over what exists of his work, so there is no claude.ai artifact
-copy of this dashboard: the Pages URL above is the address, full stop.
+**https://ttrng3.github.io/Omni-Audit/ is the only link.** A claude.ai artifact
+titled *Ecosystem Audit* exists as the Cowork preview of this page, refreshed as
+the last step of a publish (Part B of the monthly run, or the fallback), but its
+URL is never written here, in a Drive doc, or in a run report — Ty ruled on
+2026-09-24 and again on 2026-09-26 that content with a Pages address gets no
+second link. The preview must exist: "no artifact link" means the URL stays out
+of sight, never that the artifact goes. This preview was deleted on 2026-09-23
+and again on 2026-09-25 by reading the rule as "no artifact", and rebuilt on
+2026-09-26; do not make that a third time. Only the routine prompts carry the
+URL, because the job needs a publish target. `tools/build-fragment.py` derives
+the fragment the artifact needs from `index.html`; `tools/reconcile.py` diffs
+`data/` against the artifact's copy.
 
-A mirror artifact existed for a few hours that day and was deleted. Do not
-recreate one, and do not add an artifact URL to this repo. `tools/build-fragment.py`
-is kept only because it is the one thing that can derive a standalone fragment
-of this page if it is ever needed; nothing in the refresh calls it.
+Publish mechanics, verified 2026-09-26: the Artifact tool refuses a files-only
+call, so a data refresh is one call with the fragment as the page plus the
+changed `data/` paths, then a second call with the fragment alone, then read
+`index.html` back and count `<html>` tags — one is correct.
 
 ## Design layer
 

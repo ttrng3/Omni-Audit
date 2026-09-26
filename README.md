@@ -8,5 +8,6 @@ prompt and any stored memory.
 
     schedule → cloud routine → source → GitHub → Pages
 
-**GitHub Pages is the only published surface** — there is no claude.ai artifact
-copy, by Ty's ruling of 2026-09-23. See "One surface, on purpose" in `docs/audit-refresh.md`.
+**The Pages URL is the only link.** A Cowork preview artifact of this page exists
+and is refreshed after each publish, but its URL is never written here or in any
+document — see "One address, one preview" in `docs/audit-refresh.md`.
