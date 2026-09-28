@@ -1,0 +1,14 @@
+# Files GitHub Pages publishes. Nothing else in this repo is served.
+# Line types:  path or glob = published (a * never crosses a /; a glob must
+# match a file) · !path = known, deliberately not published · @prefix/ = a
+# watched area: every file the routine changes under it must match a line
+# above, or the Pages run fails "UNCOVERED".
+# The workflow deploys only once Pages is set to GitHub Actions; until then
+# every run is a dry run that stages and checks but publishes nothing.
+# Writers: the monthly audit run (Part B) on the 1st, and the fallback
+# publisher on the 2nd. Both write only the three paths below.
+index.html
+data/index.json
+data/runs/*.json
+!data/.last-check
+@data/
