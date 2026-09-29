@@ -49,4 +49,4 @@ Rules specific to Omni-Audit. **Every standing ruling in the README and in `docs
 - **Never fetch the live site from a routine.** A routine instruction that curls or web-fetches `https://ttrng3.github.io/` is High: the run parks at `requires_action` (runbook, "Verifying a run").
 - **No credentials.** No PAT in the tree; the retired Drive PAT path must not be read (runbook, "Credentials"). A token or a token-in-URL push is Critical.
 - **One address, one preview.** `https://ttrng3.github.io/Omni-Audit/` is the only link. A Cowork preview URL or artifact id anywhere in the repo is **Critical** (the repo is public). The preview itself must never be deleted (runbook, "One address, one preview").
-- **Don't widen what is published.** A new path in `.pages-allow`, or a new kind of data in `data/`, is High and needs Ty.
+- **Don't widen what is published.** A new path in `.pages-allow`, or a new kind of data in `data/`, is High and needs Ty. (Carried from Omni-TMDV's REVIEW.md; not stated in this repo's own files.)
