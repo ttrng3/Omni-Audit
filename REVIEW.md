@@ -37,7 +37,7 @@ When unsure between two levels, pick the higher one and say why.
 - [ ] **Verify before you assert:** every number in a doc or page has a source named beside it or in its section.
 
 ## Repo-specific rules
-Rules specific to Omni-Audit. **Every standing ruling in the README and in `docs/audit-refresh.md` (the runbook, which outranks the routine prompt) applies as well; a PR that breaks one is High.** The lines below are the ones most often at risk.
+Rules specific to Omni-Audit. **Every standing ruling in the README and in `docs/audit-refresh.md` (the runbook, which outranks the routine prompt) applies as well; a PR that breaks one is at least High, and Critical where a line below says so.** The lines below are the ones most often at risk.
 
 - **Nothing in this repo computes a score.** The producer scores; the routine here only publishes its handoff (runbook, "Who produces, who publishes"). Code or a routine instruction that recomputes, adjusts or invents a score, pillar or finding is High.
 - **What a refresh writes.** Only `data/.last-check`, `data/index.json` and `data/runs/<YYYY-MM-DD>.json` (runbook, "What the routine may write"). A refresh that touches `index.html` is High: it is a renderer holding no data.
