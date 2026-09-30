@@ -15,8 +15,8 @@ routine measures, scores, and writes JSON into this repo. Pages serves it.
 **The producer is Ty's scheduled task "Monthly Ecosystem Audit (cloud, v3.x
 resolver)"**, monthly on the 1st. It censuses the workspace, scores the four
 pillars, and writes its output to Google Drive
-`93 Knowledge Base/Claude outputs/Audit/` (folderId
-`1XJfVOVQyzZGFKC3au35TtMDDbcoEZe4-`) as `index.html` plus a dated
+`93 Knowledge Base/Claude outputs/Audit/` (its folder id is kept in the routine prompt,
+not in this public repo) as `index.html` plus a dated
 `<YYMMDD>_SYS_Audit_Ecosystem-Delta*.md`. **Nothing in this repo should ever
 recompute a score.**
 
