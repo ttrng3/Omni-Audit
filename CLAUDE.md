@@ -6,7 +6,7 @@ OMNI's public Ecosystem Audit scoreboard, entity **OMNI**. Live: https://ttrng3.
 
 ## Commands
 - Check `current` is in `runs[]` and every run has its file (a quick check, not full validation): `python3 -c "import json,os;d=json.load(open('data/index.json'));ids=[r['id'] for r in d['runs']];assert d['current'] in ids;assert all(os.path.exists('data/runs/%s.json'%i) for i in ids)"`
-- Secret scan of `data/`: the runbook's own grep (`docs/audit-refresh.md`, "Sanitisation"), exit 0 = clean
+- Secret and path scan of `data/`: the runbook's own greps (`docs/audit-refresh.md`, "Sanitisation"); clean = no output and exit 1, a hit = exit 0, abort
 - Build the Cowork preview page: `python3 tools/build-fragment.py` (writes `build/artifact.html`). When the routine refreshes the preview is set by its runbook, not here. Never send `index.html` itself to the preview; Pages does serve it.
 - Compare two `data/` trees: `python3 tools/reconcile.py <dir-a> <dir-b>` (exit 0 = same)
 - Freshness check, as the daily Action runs it: `python3 .github/scripts/freshness.py`
