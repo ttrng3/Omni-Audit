@@ -20,7 +20,7 @@ Run on the Mac, never from a routine (runbook, "Verifying a run — never fetch 
 
 ## Invariants
 
-Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` allows one key of one run to equal exactly #7's final redacted text, pinned by its sha256), `runs_sanitised` (runbook "Sanitisation": no credential, folder path or file name in any string of any run file or the manifest), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
+Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `current_month_published` (from 06:00 UTC on the 2nd, after the fallback's slot, `current` must be this month's run), `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` allows one key of one run to equal exactly #7's final redacted text, pinned by its sha256), `runs_sanitised` (runbook "Sanitisation": no credential, folder path or file name in any string of any run file or the manifest), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
 
 Step 2, in the page (no query strings in the fetches: the browser tool blocks them):
 ```js
@@ -41,12 +41,13 @@ All of them must be true.
 - **A stranger on the public scoreboard.** `runs_sanitised` and step 2's `no_file_names`: the 12/09 run showed a Drive folder, the mirror's file name, two control folders and what one exposes, until Ty had them redacted on 01/10 (#7). `private_not_served`: README, CLAUDE.md, REVIEW.md, the runbook, the heartbeat, the three `tools/` scripts, this protocol, one `work/` file found at run time, `freshness.py` and `.pages-allow` all exist on `main` and answer 404 live. `no_personal_traces`, `no_drive_ids_tracked` and `no_preview_tags_tracked` read every served file live and on `main` and every other tracked text file (the repo is public), reporting by count and file, never by value.
 - **A publisher that rewrites history.** `runs_immutable`: any key of any past run that differs from its first commit, outside `SANCTIONED_EDITS`, fails.
 - **A handoff whose numbers do not add up, or a publisher that edits a score.** `scores_agree` (score = sum of pillars, file = manifest). This script computes no score.
-- **A publisher that fires before the day's handoff** (22/09: the page stayed on an old run). `current_is_newest`, `heartbeat_fresh`, `data_fresh`.
+- **A publisher that fires before the day's handoff** (22/09: the page stayed on an old run). `current_month_published`: once the 2nd-of-month fallback has had its slot, an old `current` fails. (`heartbeat_fresh` and `data_fresh` alone would pass for weeks.)
 - **Another entity's data.** `no_forbidden_words` on served files, as a reader sees them.
 
 ## Sanctioned substitutes
 
 - The forbidden word list is passed on the command line, so it can change without a PR. It cannot catch a name nobody has listed. It reads served files only: REVIEW.md's own entity-separation rule names the other entity's label, so a repo-wide word check would fail on the rule itself.
+- The manifest's `pages` and `repo` keys are left out of the sanitisation scan: they hold the public addresses themselves.
 - A folder's bare name (a word like "Legal" with no slash) cannot be told from prose by a pattern, so `runs_sanitised` catches paths and file names only; folder names are read by eye in the run's tiles and watchlist.
 - The preview cannot be fetched by a script, so step 4 is done by the runner with `Artifact list` and `Artifact read`.
 

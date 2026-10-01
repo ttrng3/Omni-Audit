@@ -100,6 +100,11 @@ def main():
     v["runs_well_formed"] = bool(ids) and all(re.fullmatch(r"\d{4}-\d{2}-\d{2}", i) for i in ids)
     v["runs_newest_first_unique"] = ids == sorted(ids, reverse=True) and len(set(ids)) == len(ids)
     v["current_is_newest"] = bool(ids) and d.get("current") == ids[0]
+    # The month's run must be published once the 2nd-of-month fallback has had its time (cron 0 3 1/2 * *, +3 h).
+    now = dt.datetime.now(dt.timezone.utc)
+    due = now >= now.replace(day=2, hour=6, minute=0, second=0, microsecond=0)
+    info["month_due"] = now.strftime("%Y-%m") if due else None
+    v["current_month_published"] = (not due) or str(d.get("current", ""))[:7] == now.strftime("%Y-%m")
     v["run_files_match"] = sorted(ids) == files and all(loaded[i] is not None and loaded[i].get("id") == i for i in files)
 
     # The producer scores; here the published numbers only have to agree: score = sum of pillars, file = manifest.
@@ -137,7 +142,9 @@ def main():
         if isinstance(o, str):
             yield o
         elif isinstance(o, dict):
-            for x in o.values():
+            for k, x in o.items():
+                if isinstance(k, str):
+                    yield k
                 yield from strings(x)
         elif isinstance(o, list):
             for x in o:
@@ -203,6 +210,13 @@ def main():
     info["preview_tags_tracked"] = {k: len(PREVIEW_TAG.findall(t)) for k, t in texts.items() if PREVIEW_TAG.search(t)}
     v["no_preview_tags_tracked"] = not info["preview_tags_tracked"]
     served_texts = [t for k, t in texts.items() if k.split(":", 1)[1] in served]
+    # JSON hides accents and quotes behind escapes: read the decoded strings of every served JSON file too.
+    for p in served:
+        if p.endswith(".json") and (ROOT / p).exists():
+            try:
+                served_texts.append(" ".join(strings(json.loads((ROOT / p).read_text(encoding="utf-8")))))
+            except ValueError:
+                pass
     info["forbid_checked"] = len(forbid)
     v["no_forbidden_words"] = bool(forbid) and not any(w in norm(t) for w in forbid for t in served_texts)
 
