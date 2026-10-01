@@ -41,7 +41,7 @@ Rules specific to Omni-Audit. **Every standing ruling in the README and in `docs
 
 - **Nothing in this repo computes a score.** The producer scores; the routine here only publishes its handoff (runbook, "Who produces, who publishes"). Code or a routine instruction that recomputes, adjusts or invents a score, pillar or finding is High.
 - **What a refresh writes.** Only `data/.last-check`, `data/index.json` and `data/runs/<YYYY-MM-DD>.json` (runbook, "What the routine may write"). A refresh that touches `index.html` is High: it is a renderer holding no data.
-- **Run files are immutable.** A diff that edits or deletes an existing `data/runs/*.json` is High; the trend is built from `runs[]` in the manifest.
+- **Run files are immutable.** A diff that edits or deletes an existing `data/runs/*.json` is High (one past exception, Ty 2026-10-01: the 2026-09-12 redaction, runbook "Sanitisation"); the trend is built from `runs[]` in the manifest.
 - **The scoreboard is public and sanitised.** It carries scores, RAG, deltas, counts and PASS/FAIL only, never a path, a filename, a finding detail or a credential (runbook, "Sanitisation"). Any of those in `data/` is **Critical**. The secret patterns listed there abort a write; a diff that weakens that scan is High.
 - **Run HTML uses the page's tokens** (`var(--accent)`, `--warning`, `--critical`, `--ink`, `--muted`, `--rule`), never raw hex (runbook, "Design layer").
 - **Light only, ruled 2026-09-24 by Ty.** No dark theme, and no return to the old warm palette (runbook, "Design layer").
