@@ -77,7 +77,7 @@ at least once a month and one missed month trips it.
     data/runs/<YYYY-MM-DD>.json   one file per audit run
 
 Never `index.html` — it is a renderer holding no data. **Never rewrite a prior
-run's file.** Each run is independent and immutable once written; the trend
+run's file** (one past exception: see Sanitisation). Each run is independent and immutable once written; the trend
 chart is built from `runs[]` in the manifest, which is why score and pillars
 live there.
 
@@ -98,6 +98,18 @@ credential. The full unsanitised record goes to Drive, not here.
 Before writing, scan the run html for `github_pat_`, `ghp_`, `gho_`, `sk-`,
 `AKIA`, `AIza`, `xoxb-`, `xoxp-`, `-----BEGIN`, and any inline `:password@` in
 a URL. A hit aborts the write.
+Also scan it for a folder path or a file name, and abort on a hit like a
+credential (the producer's handoff is fixed at the source, never here). The
+scan is clean when this prints nothing and exits 1:
+`grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/'`
+A bare extension in prose is fine. Counts stay; names and finding details go:
+a folder's bare name cannot be grepped, so read the tiles, watchlist, action
+plan and decision box for one. The 2026-09-12 run once named its Drive
+folder, the mirror file, two control folders and what one of them exposes,
+and described its flagged credentials and hygiene findings; Ty had those
+redacted to counts on 2026-10-01 (footer now "Private record: on Drive, not
+here."), the only edit ever made to a past run's file. No other past run is
+ever rewritten.
 
 ## Verifying a run — never fetch the live site
 
