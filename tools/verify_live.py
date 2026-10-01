@@ -30,8 +30,9 @@ PREVIEW_TAG = re.compile(r"(?<![\w-])\d{10}-[0-9a-f]{4}(?![\w-])")  # a Cowork p
 # Runbook "Sanitisation": the run html carries no credential, no folder path and no file name.
 SECRETS = re.compile(r"github_pat_|ghp_|gho_|sk-|AKIA|AIza|xoxb-|xoxp-|-----BEGIN|://[^\s/@]+:[^\s/@]+@")
 PATHISH = re.compile(r"\b[\w-]+\.(?:md|json|py|xlsx|csv|html|js|txt|pdf)\b|(?:^|[\s(])(?:/Users/|/home/|~/|[A-Z]:\\)|\b\w[\w ]*/[\w ]+/")
-# The one sanctioned edit to a past run (Ty, 2026-10-01: a path redacted from the footer). Nothing else may change.
-SANCTIONED_EDITS = {"2026-09-12": {"html"}}
+# The one sanctioned edit to a past run (Ty, 2026-10-01, #7): the 2026-09-12 html may equal its first commit or
+# exactly this redacted text (sha256), nothing else.
+SANCTIONED_EDITS = {"2026-09-12": {"html": "779800ed49108fd51fab9cf02c5974b0b29fee3f76739eb886ef5560a1a7ea5e"}}
 HEARTBEAT_MAX = 35  # pipeline-wiring's watchdog for this monthly pipeline (cron 0 3 1 * *)
 DATA_MAX = 45       # MAX_DATA_AGE_DAYS default in .github/scripts/freshness.py
 
@@ -90,6 +91,7 @@ def main():
     for i in files:
         try:
             loaded[i] = json.loads((ROOT / f"data/runs/{i}.json").read_text(encoding="utf-8"))
+            loaded[i] = loaded[i] if isinstance(loaded[i], dict) else None
         except (OSError, ValueError):
             loaded[i] = None
 
@@ -102,7 +104,7 @@ def main():
     def agrees(r):
         f = loaded.get(str(r.get("id"))) or {}
         p = r.get("pillars") or {}
-        return (all(isinstance(x, int) for x in p.values()) and isinstance(r.get("score"), int) and
+        return (isinstance(p, dict) and len(p) == 4 and all(isinstance(x, int) for x in p.values()) and isinstance(r.get("score"), int) and
                 0 <= r["score"] <= 100 and r["score"] == sum(p.values()) and
                 f.get("score") == r["score"] and f.get("pillars") == p)
     v["scores_agree"] = bool(runs) and all(agrees(r) for r in runs)
@@ -115,7 +117,12 @@ def main():
             if not first or loaded[i] is None:
                 continue
             orig = json.loads(git("show", f"{first[-1]}:data/runs/{i}.json"))
-            diff = {k for k in set(orig) | set(loaded[i]) if orig.get(k) != loaded[i].get(k)} - SANCTIONED_EDITS.get(i, set())
+            if not isinstance(orig, dict):
+                changed[i] = ["<not an object at first commit>"]
+                continue
+            ok = SANCTIONED_EDITS.get(i, {})
+            diff = {k for k in set(orig) | set(loaded[i]) if orig.get(k) != loaded[i].get(k)
+                    and not (k in ok and hashlib.sha256(str(loaded[i].get(k)).encode()).hexdigest() == ok[k])}
             if diff:
                 changed[i] = sorted(diff)
         v["runs_immutable"] = not changed
@@ -123,10 +130,24 @@ def main():
         v["runs_immutable"] = False
     info["runs_changed_keys"] = changed
 
-    # Runbook "Sanitisation", on what a reader sees of each run.
-    info["sanitisation_hits"] = {i: {"secrets": len(SECRETS.findall(r.get("html", ""))),
-                                     "paths_or_files": len(PATHISH.findall(text_of(r.get("html", ""))))}
-                                 for i, r in loaded.items() if r and (SECRETS.search(r.get("html", "")) or PATHISH.search(text_of(r.get("html", ""))))}
+    # Runbook "Sanitisation", on what a reader sees: every string value in every run file and in the manifest.
+    def strings(o):
+        if isinstance(o, str):
+            yield o
+        elif isinstance(o, dict):
+            for x in o.values():
+                yield from strings(x)
+        elif isinstance(o, list):
+            for x in o:
+                yield from strings(x)
+    sources = {f"runs/{i}": r for i, r in loaded.items() if r} | {"index": {k: x for k, x in d.items() if k not in ("pages", "repo")}}
+    info["sanitisation_hits"] = {}
+    for name, o in sources.items():
+        vals = list(strings(o))
+        n_sec = sum(len(SECRETS.findall(x)) for x in vals)
+        n_path = sum(len(PATHISH.findall(text_of(x))) for x in vals)
+        if n_sec or n_path:
+            info["sanitisation_hits"][name] = {"secrets": n_sec, "paths_or_files": n_path}
     v["runs_sanitised"] = not info["sanitisation_hits"]
 
     served = ["index.html", "data/index.json"] + [f"data/runs/{i}.json" for i in files]

@@ -2,7 +2,7 @@
 
 ## Promise
 
-Every file https://ttrng3.github.io/Omni-Audit/ serves (the page, `index.json`, every run file) is byte-identical to `main`. The manifest lists well-formed run dates, newest first, `current` is the newest, and each run has its file carrying its own id. Each run's score is an integer from 0 to 100 equal to the sum of its pillars, and the run file agrees with the manifest. No run file has changed since it was first written, apart from the one redaction Ty sanctioned on 2026-10-01. No run carries a credential, a folder path or a file name. The page renders the current run. No private file, personal link, email address, account handle, Drive id or Cowork preview tag sits in any served or tracked file, and no word from another entity is served. The Cowork preview carries `main`'s data or the last run's.
+Every file https://ttrng3.github.io/Omni-Audit/ serves (the page, `index.json`, every run file) is byte-identical to `main`. The manifest lists well-formed run dates, newest first, `current` is the newest, and each run has its file carrying its own id. Each run's score is an integer from 0 to 100 equal to the sum of its pillars, and the run file agrees with the manifest. No run file has changed since it was first written, apart from the one redaction Ty sanctioned on 2026-10-01. No string anywhere in a run file or the manifest carries a credential, a folder path or a file name. The page renders the current run. No private file, personal link, email address, account handle, Drive id or Cowork preview tag sits in any served or tracked file, and no word from another entity is served. The Cowork preview carries `main`'s data or the last run's.
 
 ## Clean state
 
@@ -20,7 +20,7 @@ Run on the Mac, never from a routine (runbook, "Verifying a run — never fetch 
 
 ## Invariants
 
-Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` names the one exception), `runs_sanitised` (runbook "Sanitisation": no credential, folder path or file name in what a reader sees of a run), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
+Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` allows one key of one run to equal exactly the redacted text, pinned by its sha256), `runs_sanitised` (runbook "Sanitisation": no credential, folder path or file name in any string of any run file or the manifest), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
 
 Step 2, in the page (no query strings in the fetches: the browser tool blocks them):
 ```js
@@ -29,7 +29,7 @@ const idx=await fetch('data/index.json').then(r=>r.json());
 const cur=idx.runs.find(r=>r.id===idx.current);
 const dash=s=>s.replace(/[\u2010\u2011\u2012\u2013]/g,'-');
 const page=dash(document.body.innerText), app=document.getElementById('app').innerText;
-JSON.stringify({current_label_shown:page.includes(dash(cur.label)), current_score_shown:app.includes(String(cur.score)),
+JSON.stringify({current_label_shown:page.includes(dash(cur.label)), current_score_shown:new RegExp('(^|[^0-9])'+cur.score+'([^0-9]|$)').test(app),
   no_load_error:!app.includes('data/index.json'),
   no_storage_links:!document.querySelector('a[href*="sharepoint"],a[href*="1drv"],a[href*="drive.google"],a[href*="personal/"]'),
   no_file_names:!/\b[\w-]+\.(md|json|py|xlsx|csv|html|js|txt|pdf)\b/.test(page)})
@@ -46,7 +46,7 @@ All of them must be true.
 
 ## Sanctioned substitutes
 
-- The forbidden word list is passed on the command line, so it can change without a PR. It cannot catch a name nobody has listed.
+- The forbidden word list is passed on the command line, so it can change without a PR. It cannot catch a name nobody has listed. It reads served files only: REVIEW.md's own entity-separation rule names the other entity's label, so a repo-wide word check would fail on the rule itself.
 - A folder's bare name (a word like "Legal" with no slash) cannot be told from prose by a pattern, so `runs_sanitised` catches paths and file names only; folder names are read by eye in the run's tiles and watchlist.
 - The preview cannot be fetched by a script, so step 4 is done by the runner with `Artifact list` and `Artifact read`.
 
