@@ -21,7 +21,7 @@ OMNI's public Ecosystem Audit scoreboard, entity **OMNI**. Live: https://ttrng3.
 - Changes reach `main` through a PR and Ty's ship. The only direct writes are the ones a routine's prompt and runbook allow.
 - The runbook and README win over this file and any memory note.
 - Nothing in this repo computes a score. The producer scores; this repo only carries its handoff. The publisher never scores.
-- Never rewrite or delete a prior run's file under `data/runs/`.
+- Never rewrite or delete a prior run's file under `data/runs/` (one sanctioned exception, 2026-10-01: runbook "Sanitisation").
 - The scoreboard is public and sanitised: scores, RAG, deltas, counts and PASS/FAIL only; never a path, a filename, a finding detail or a credential.
 - Light only (Ty, 2026-09-24). Run HTML uses the page's tokens (`var(--accent)`, `--warning`, …), never raw hex.
 - Never write a Cowork preview URL or artifact id, a person's details or a secret into this public repo.

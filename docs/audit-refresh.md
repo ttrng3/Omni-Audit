@@ -98,11 +98,14 @@ credential. The full unsanitised record goes to Drive, not here.
 Before writing, scan the run html for `github_pat_`, `ghp_`, `gho_`, `sk-`,
 `AKIA`, `AIza`, `xoxb-`, `xoxp-`, `-----BEGIN`, and any inline `:password@` in
 a URL. A hit aborts the write.
-Also scan it for a folder path or a file name (a word ending in `.md`, `.json`,
-`.py`, `.xlsx`, `.csv`, `.html`, `.js`, `.txt` or `.pdf`); say "the private record
-(Drive)" instead. The 2026-09-12 run once named its Drive folder and mirror file;
-Ty had that one path redacted on 2026-10-01, the only edit ever made to a past
-run's file. No other past run is ever rewritten.
+Also scan it for a folder path, a folder's name, or a file name (a name plus
+an extension such as `.md`, `.json`, `.py`, `.xlsx`, `.csv`, `.html`, `.js`,
+`.txt` or `.pdf`; a bare extension in prose is fine). A hit aborts the write,
+like a credential: the producer's handoff is fixed at the source, never here.
+Counts stay; names go. The 2026-09-12 run once named its Drive folder, the
+mirror file, two control folders and what one of them exposes; Ty had those
+redacted on 2026-10-01 (footer now "Private record: on Drive, not here."), the
+only edit ever made to a past run's file. No other past run is ever rewritten.
 
 ## Verifying a run — never fetch the live site
 
