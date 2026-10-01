@@ -29,10 +29,12 @@ DRIVE_ID = re.compile(r"(?<![A-Za-z0-9_-])(?:1[A-Za-z0-9_-]{32}(?:[A-Za-z0-9_-]{
 PREVIEW_TAG = re.compile(r"(?<![\w-])\d{10}-[0-9a-f]{4}(?![\w-])")  # a Cowork preview version tag
 # Runbook "Sanitisation": the run html carries no credential, no folder path and no file name.
 SECRETS = re.compile(r"github_pat_|ghp_|gho_|sk-|AKIA|AIza|xoxb-|xoxp-|-----BEGIN|://[^\s/@]+:[^\s/@]+@")
-PATHISH = re.compile(r"\b[\w-]+\.(?:md|json|py|xlsx|csv|html|js|txt|pdf)\b|(?:^|[\s(])(?:/Users/|/home/|~/|[A-Z]:\\)|\b\w[\w ]*/[\w ]+/")
+# The runbook's own path grep (docs/audit-refresh.md "Sanitisation"), case-insensitive, plus a Windows drive path.
+PATHISH = re.compile(r'[^ ./<>"]+\.(?:md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[A-Z]:\\|'
+                     r'[^/<>",+ \n][^/<>",+\n]*/[^/<>",+0-9 \n][^/<>",+\n]*/', re.I)
 # The one sanctioned edit to a past run (Ty, 2026-10-01, #7): the 2026-09-12 html may equal its first commit or
 # exactly this redacted text (sha256), nothing else.
-SANCTIONED_EDITS = {"2026-09-12": {"html": "779800ed49108fd51fab9cf02c5974b0b29fee3f76739eb886ef5560a1a7ea5e"}}
+SANCTIONED_EDITS = {"2026-09-12": {"html": "d0e4434c669605e274a2f31c69d1edc865b8dbe6dbf6ca61ad4e360f98953ec4"}}
 HEARTBEAT_MAX = 35  # pipeline-wiring's watchdog for this monthly pipeline (cron 0 3 1 * *)
 DATA_MAX = 45       # MAX_DATA_AGE_DAYS default in .github/scripts/freshness.py
 

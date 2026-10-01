@@ -20,7 +20,7 @@ Run on the Mac, never from a routine (runbook, "Verifying a run — never fetch 
 
 ## Invariants
 
-Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` allows one key of one run to equal exactly the redacted text, pinned by its sha256), `runs_sanitised` (runbook "Sanitisation": no credential, folder path or file name in any string of any run file or the manifest), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
+Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` allows one key of one run to equal exactly #7's final redacted text, pinned by its sha256), `runs_sanitised` (runbook "Sanitisation": no credential, folder path or file name in any string of any run file or the manifest), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
 
 Step 2, in the page (no query strings in the fetches: the browser tool blocks them):
 ```js
