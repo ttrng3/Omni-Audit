@@ -2,6 +2,8 @@
 
 **Approved:** 2026-10-02 (Ty, in chat)
 
+**Changed after review, 2026-10-02 (reviewer High + Mediums on #9), recorded so the spec matches the diff:** the scan no longer pipes `perl` into `grep`. `perl` opens the run html itself (a failed open stops it), writes a temp file, and `grep` runs only after it succeeds; "clean" is now no output at all and exit 1, so an unreadable file or a missing `perl` aborts. The list gains `pass/fail/skip` (named in the intent's Outcome). The boundary also refuses a phrase followed by `.` or `-` plus a letter or slash, or preceded by a letter or slash plus `.` or `-`, so the phrase can't lend its slashes to a path or file name ("red/amber/green.md" still aborts). The two lists are described as two copies that must match.
+
 **Intent:** accepted 2026-10-02 · **Status:** approved
 
 ## Requirements

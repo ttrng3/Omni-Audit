@@ -32,10 +32,10 @@ SECRETS = re.compile(r"github_pat_|ghp_|gho_|sk-|AKIA|AIza|xoxb-|xoxp-|-----BEGI
 # The runbook's own path grep (docs/audit-refresh.md "Sanitisation"), case-insensitive, plus a Windows drive path.
 PATHISH = re.compile(r'[^ ./<>"]+\.(?:md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[A-Z]:\\|'
                      r'[^/<>",+ \n][^/<>",+\n]*/[^/<>",+0-9 \n][^/<>",+\n]*/', re.I)
-# Exact whole phrases the path scan ignores (runbook "Sanitisation", its perl stage): removed only where they stand
-# alone, so one inside a path is kept and the path still counts. One list; adding a phrase edits this and the runbook.
-EXEMPT = ["red/amber/green"]
-EXEMPT_RE = re.compile(r"(?<![\w/])(?:" + "|".join(map(re.escape, EXEMPT)) + r")(?![\w/])", re.I)
+# Exact whole phrases the path scan ignores (runbook "Sanitisation", its perl step): removed only where they stand
+# alone, so one inside a path or a file name is kept and still counts. Must match the runbook's list; a new phrase edits both.
+EXEMPT = ["red/amber/green", "pass/fail/skip"]
+EXEMPT_RE = re.compile(r"(?<![\w/])(?<![\w/][.-])(?:" + "|".join(map(re.escape, EXEMPT)) + r")(?![\w/]|[.-][\w/])", re.I)
 # The one sanctioned edit to a past run (Ty, 2026-10-01, #7): the 2026-09-12 html may equal its first commit or
 # exactly this redacted text (sha256), nothing else.
 SANCTIONED_EDITS = {"2026-09-12": {"html": "d0e4434c669605e274a2f31c69d1edc865b8dbe6dbf6ca61ad4e360f98953ec4"}}
