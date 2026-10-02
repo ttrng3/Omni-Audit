@@ -50,7 +50,10 @@ All of them must be true.
 - The manifest's `pages` and `repo` keys are left out of the sanitisation scan: they hold the public addresses themselves.
 - A folder's bare name (a word like "Legal" with no slash) cannot be told from prose by a pattern, so `runs_sanitised` catches paths and file names only; folder names are read by eye in the run's tiles and watchlist.
 - The preview cannot be fetched by a script, so step 4 is done by the runner with `Artifact list` and `Artifact read`.
-- A listed exempt phrase wrapped in markup inside a path (`Audit/<b>red/amber/green</b>/x/`) is removed, so that path is not caught, by the runbook's line or `verify_live.py` (both run 02/10); `main`'s plain grep would have caught it. Keeping it would make the phrase's most common form, directly before a closing tag (`<td>red/amber/green</td>`), abort every publish. Punctuation alone does not hide a path: a phrase with `/` one punctuation mark away (`Audit/(red/amber/green)`) is kept and the path aborts. A slash written as an HTML entity beside the phrase (`Audit&#47;red/amber/green`) is the second known limit: it is not caught, where `main`'s grep caught it; refusing `&` would make `red/amber/green&nbsp;` abort (02/10).
+- **The path scan's three accepted limits** (Ty, 02/10). The scan replaces each exempt phrase (`red/amber/green`, `pass/fail/skip`) with the word `RAG`, so a phrase's own slashes never count; a path with two linked slashes of its own still aborts, next to the phrase or around it. Not caught, where `main` caught them only through the phrase:
+  1. A tag inside a path around the phrase: `Audit/<b>red/amber/green</b>/x/`. The publish gate lets it through; `runs_sanitised` here still flags it, because `verify_live.py` reads the text with tags removed (as it did on `main` for any tag-split path).
+  2. A slash written as an HTML entity beside the phrase: `Audit&#47;red/amber/green`.
+  3. A path that reaches two slashes only with the phrase's own: `Legal/Contracts red/amber/green`, `Audit/(red/amber/green)`, `red/amber/green-x/`.
 
 ## Evidence
 
@@ -71,4 +74,4 @@ All of them must be true.
 - The browser tool refuses fetches with a query string, so step 2 fetches plain paths (01/10).
 - The run label sits in the page header, outside `#app`, and the page draws its hyphens as non-breaking (U+2011); step 2 reads the whole page and folds hyphens before comparing (01/10).
 - The runbook quotes `:password@` as an example of what to scan for; the trace check allows that one string by name.
-- The path scan ignores exact whole phrases, kept in two lists that must match: the runbook's `perl` step and `EXEMPT` in `tools/verify_live.py` ("red/amber/green", "pass/fail/skip" on 02/10), and only where they stand alone; a listed phrase inside a path or a file name still counts. The runbook's scan is clean only with no output at all and exit 1, so an unreadable run html aborts. On a Mac, test the runbook's line with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper that matches neither the prose nor a real path (02/10).
+- The exempt phrases are kept in two lists that must match: the runbook's `perl` step and `EXEMPT` in `tools/verify_live.py`. The runbook's scan is clean only with no output at all and exit 1, so an unreadable run html aborts. On a Mac, test it with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper that matches neither the prose nor a real path (02/10).

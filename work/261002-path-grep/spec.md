@@ -2,31 +2,35 @@
 
 **Approved:** 2026-10-02 (Ty, in chat)
 
-**Changed after review, 2026-10-02 (reviewer High + Mediums on #9), recorded so the spec matches the diff:** the scan no longer pipes `perl` into `grep`. `perl` opens the run html itself (a failed open stops it), writes a temp file, and `grep` runs only after it succeeds; "clean" is now no output at all and exit 1, so an unreadable file or a missing `perl` aborts. The list gains `pass/fail/skip` (named in the intent's Outcome). The boundary also refuses a phrase followed by `.` or `-` plus a letter or slash, or preceded by a letter or slash plus `.` or `-`, so the phrase can't lend its slashes to a path or file name ("red/amber/green.md" still aborts). The two lists are described as two copies that must match.
+**Simplest version approved:** 2026-10-02 (Ty, in chat), after six review rounds on the boundary design kept finding new edges. It replaces the earlier post-review design; that history is in the PR's commits. Ty's terms: a multi-slash path next to the phrase still aborts, and the three accepted limits are listed in the protocol in one place. Limits accepted by Ty: a tag inside a path around the phrase, and an entity-encoded slash beside it (both 2026-10-02); the phrase-slash class (approved with this version).
 
 **Intent:** accepted 2026-10-02 · **Status:** approved
 
 ## Requirements
-1. Before the path scan, remove each exempt phrase from the text. The exempt phrases are exact whole phrases, kept in one list (intent, answer (a)).
-2. A phrase is removed only where it stands alone: not preceded or followed by a letter, a digit or a `/`. So "red/amber/green" inside a path ("Audit/red/amber/green/") is not removed, and the path still aborts.
-3. A real path next to an exempt phrase still aborts the publish (Ty, 2026-10-02).
-4. The scan's other two alternatives are unchanged: the file-name alternative, and the `/Users/`, `/home/`, `~/` alternative (Ty, 2026-10-02). The third alternative, the folder-path rule, is unchanged too. Only the input to it changes.
-5. The scoreboard check in `tools/verify_live.py`, which carries its own copy of the pattern (`PATHISH`), applies the same list the same way.
+1. Before the path scan, each exempt phrase is replaced by the word `RAG`. The phrases are exact and matched in any case, kept in one list per copy: `red/amber/green`, `pass/fail/skip` (intent, answer (a); the intent's Outcome).
+2. A phrase's own slashes never count toward a path. Every other character is scanned exactly as before: the `grep` pattern is unchanged, and so is `PATHISH`.
+3. A path with two linked slashes of its own still aborts, whether it sits next to the phrase or around it (Ty, 2026-10-02).
+4. The scan fails safe: "clean" is no output at all (stdout or stderr) and exit 1, so an unreadable run html or a missing `perl` aborts.
+5. `tools/verify_live.py` applies the same list the same way.
+6. The three accepted limits are listed in one place in `verification/scoreboard.md`.
 
 ## Design
-- **The list.** Exact whole phrases, matched case-insensitively: `red/amber/green` (the page's RAG wording) and `pass/fail/skip` (named in the intent). They're kept in two copies that must match: the runbook's `perl` group and `EXEMPT` in `tools/verify_live.py`. The three published runs contain no two-slash phrase today (checked 2026-10-02).
-- **Standing alone.** A phrase is removed only when no letter, digit or `/` touches it, and no `.` or `-` followed by a letter or `/` follows it (or precedes it after a letter or `/`), and no `/` sits one punctuation mark away on either side ("Audit/(red/amber/green)"), except the `<` of a closing tag, so `<td>red/amber/green</td>` is still removed. `verify_live.py` removes the phrases from the raw html before `text_of`, as the runbook does. So a phrase can't lend its slashes to a path or a file name: "red/amber/green.md" and "Audit/red/amber/green/" still abort. `-CSD` and `\w` make a Vietnamese letter count as a letter in perl, as it does in Python.
-- **The runbook command.** No pipe. `perl` opens the run html itself and dies if it can't, writes the cleaned text to a temp file, and the unchanged `grep` runs on it only after (`&&`):
+- **The runbook line.** No pipe:
   ```
-  perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{…}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '<the pattern, unchanged>' /tmp/omni-audit-scan.txt
+  t=$(mktemp) && perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{red/amber/green|pass/fail/skip}{RAG}gi; print }' "<run html>" > "$t" && grep -niE '<the pattern, unchanged>' "$t"; r=$?; rm -f "$t"; (exit $r)
   ```
-  - **"Clean"** is no output at all (stdout or stderr) and exit 1. An unreadable file (rc 2) or a missing `perl` (rc 127) aborts.
-  - **Temp file.** A fresh `mktemp` file, removed after the result is read; the line's own exit is grep's.
-  - **Quoting.** The path is quoted, so a space in it can't break the scan.
-  - **Mac note.** On a Mac, test with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper.
-- **`tools/verify_live.py`.** `EXEMPT` plus one compiled regex with the same boundaries, applied before `PATHISH` counts. `PATHISH` is unchanged.
-- **`verification/scoreboard.md`.** Traps: the two lists, the clean rule, the Mac `grep`. Sanctioned substitutes: a listed phrase wrapped in markup inside a path is not caught (the same blind spot as any tag-split path).
-- **To add a phrase later:** one PR that edits both lists, with Ty's ship. No catch-all patterns.
+  - `perl` dies if it can't open the file.
+  - The temp file is fresh and is removed after the result is read.
+  - The path is quoted, so a space in it can't break the scan.
+  - Run the line without `set -e`, because a clean `grep` exits 1.
+  - On a Mac, test with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper.
+- **`tools/verify_live.py`.** `EXEMPT` with the same two phrases. `EXEMPT_RE` is their plain alternation, case-insensitive. Each phrase is replaced by `RAG` on the raw string, then `text_of`, then `PATHISH`.
+- **`verification/scoreboard.md`.**
+  - Sanctioned substitutes: one entry with the rule and the three accepted limits.
+  - Limit 1 is still flagged after publish by `runs_sanitised`, because `verify_live.py` reads text with tags removed. It did the same on `main` for any tag-split path.
+  - Traps: the two lists must match, the clean rule, and the Mac `grep`.
+- **Repo `CLAUDE.md`.** The command line states the clean rule.
+- **To add a phrase later:** one PR that edits both lists, with Ty's ship.
 
 ## Ty's checks
 - **Do the routine prompts quote the pattern? No (Verified 2026-10-02, both prompts read live with `RemoteTrigger get`).**
@@ -49,7 +53,7 @@ Not loaded: "ty-report-standard" and "apple-design". Nothing on the page changes
 | Rule (by name) | What in the design touches it | Resolution |
 |---|---|---|
 | Runbook "Sanitisation": a path or file name aborts the write | An exempt phrase is removed before the scan | Only exact whole phrases, never inside a path (requirement 2); the promise proves a neighbouring path still aborts |
-| Repo `CLAUDE.md` command line "Secret and path scan of `data/`: the runbook's own greps" | It points to the runbook, so it stays true | No edit needed |
+| Repo `CLAUDE.md` command line "Secret and path scan of `data/`: the runbook's own greps" | Its clean rule changes | Edited: "no output at all (stdout or stderr) and exit 1" |
 | "Past runs are never rewritten" | No run file changes | No conflict |
 | Artifact-mirror contract | The page and the preview are unchanged | No conflict |
 
@@ -59,28 +63,28 @@ Not loaded: "ty-report-standard" and "apple-design". Nothing on the page changes
 2 Visibility ..... PUBLIC — PASS: the change adds no data
 3 Pages .......... PASS: Actions workflow; allowlist serves index.html, data/index.json, data/runs/*.json; unchanged
 4 Supabase ....... N/A
-Verdict: safe to ship; the change narrows nothing but one named phrase
+Verdict: safe to ship; the scan ignores only the two named phrases' own slashes
 ```
 
 ## Promise
-Run on the branch, with the runbook's line taken from the file and run as written using `/usr/bin/grep`.
-1. **Must abort:**
-   - the real Drive path "93 Knowledge Base/Claude outputs/Audit/";
-   - "Audit/red/amber/green/" and "red/amber/green/Audit/x/";
-   - a path next to "red/amber/green" and next to "(Red/Amber/Green)";
-   - "red/amber/green.md", "red/amber/green-x/" and "x.red/amber/green/y/";
-   - "Audit/pass/fail/skip/";
-   - "/Users/someone", "~/notes" and "report.md";
-   - "Audit/(red/amber/green)", "Audit/'red/amber/green'", "(red/amber/green)/Audit/" and "Audit/\"pass/fail/skip\"";
-   - `<td>Audit/red/amber/green/x/</td>` and `<p>93 Knowledge Base/Claude outputs/Audit/</p>`.
-2. **Must be clean:**
-   - `<td>red/amber/green</td>`, `<b>Red/Amber/Green</b>`, `<li>pass/fail/skip</li>` and `<span class="rag">red/amber/green</span>: 4 pillars`;
+Run on the branch, with the runbook's line taken from the file and run as written using `/usr/bin/grep`; `verify_live.py`'s function on the same lines.
+1. **Must abort, in both copies** (16 lines):
+   - the real Drive path, and the same path next to the phrase on either side ("93 Knowledge Base/Claude outputs/Audit/ red/amber/green");
+   - "(Red/Amber/Green) Claude outputs/Audit/";
+   - "Audit/red/amber/green/", "red/amber/green/Audit/x/", "red/amber/green.md" and "x.red/amber/green/y/";
+   - "Audit/pass/fail/skip/" and "(red/amber/green)/Audit/";
+   - `<td>Audit/red/amber/green/x/</td>` and `<p>93 Knowledge Base/Claude outputs/Audit/</p>`;
+   - "/Users/someone", "/home/x", "~/notes" and "report.md".
+2. **Must be clean, in both copies** (13 lines):
    - "red/amber/green", "Pillars: Red/Amber/Green.", "(red/amber/green)" and "Tổng: red/amber/green.";
    - "PASS/FAIL/SKIP" and "guardrails pass/fail/skip: 3/0/0";
-   - "82/100" and "01/10/2026".
-3. **Failure paths abort:** a missing run html, and a missing `perl`. A run html whose path has a space scans normally.
-4. **The other two alternatives are unchanged:** the `grep` pattern is byte-identical to main's, and no `PATHISH` line changed.
-5. **Agreement:** `verify_live.py`'s function agrees with the runbook on every line, HTML included. Two known limits are clean in both, where `main` caught them (Sanctioned substitutes): a tag inside a path around the phrase (`Audit/<b>red/amber/green</b>/x/`) and an entity-encoded slash beside it (`Audit&#47;red/amber/green`).
+   - "82/100" and "01/10/2026";
+   - `<td>red/amber/green</td>`, `<b>Red/Amber/Green</b>`, `<li>pass/fail/skip</li>`, `<span class="rag">red/amber/green</span>: 4 pillars` and `<br/>Red/Amber/Green`.
+3. **The accepted limits behave as recorded:**
+   - the runbook line passes all five example lines;
+   - `verify_live.py` passes four of them and flags limit 1.
+4. **Failure paths:** a missing run html aborts.
+5. **Unchanged:** the `grep` pattern is byte-identical to `main`'s, and no `PATHISH` line changed.
 6. **The three published runs** scan clean. `verify_live.py --forbid …` on the branch exits 0.
 7. **Then:** the reviewer, Ty's ship, and the verifier on `main`.
 

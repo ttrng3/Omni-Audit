@@ -104,12 +104,13 @@ scan is clean only when this prints nothing at all (stdout or stderr) and exits 
 any other result aborts, including an unreadable run html or a missing `perl` (on a
 Mac, test it with `/usr/bin/grep`: the shell's `grep` there is a ugrep wrapper that
 matches differently):
-`t=$(mktemp) && perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{(?<![\w/])(?<![\w/][.-])(?<!/[^\w\s])(?:red/amber/green|pass/fail/skip)(?![\w/]|[.-][\w/]|[^\w\s<]/)}{ }gi; print }' "<run html>" > "$t" && grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' "$t"; r=$?; rm -f "$t"; (exit $r)`
-The `perl` step removes the exempt phrases, exact whole phrases in its `(?:…)` group,
-and only where they stand alone: a phrase inside a path or a file name is kept, so the
-path still aborts. The same list is kept as `EXEMPT` in `tools/verify_live.py`; the two
-must match, and adding a phrase is a PR that edits both. Keep the quotes around the
-run html's path: a path with a space would otherwise abort the scan.
+`t=$(mktemp) && perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{red/amber/green|pass/fail/skip}{RAG}gi; print }' "<run html>" > "$t" && grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' "$t"; r=$?; rm -f "$t"; (exit $r)`
+The `perl` step replaces each exempt phrase, exact and in any case, with the word `RAG`,
+so a phrase's own slashes never count toward a path; everything else is scanned exactly
+as before. The same list is kept as `EXEMPT` in `tools/verify_live.py`; the two must
+match, and adding a phrase is a PR that edits both. Keep the quotes around the run
+html's path, and run the line without `set -e` (a clean `grep` exits 1). The limits
+this accepts are listed in `verification/scoreboard.md`, "Sanctioned substitutes".
 A bare extension in prose is fine. Counts stay; names and finding details go:
 a folder's bare name cannot be grepped, so read the tiles, watchlist, action
 plan and decision box for one. The 2026-09-12 run once named its Drive
