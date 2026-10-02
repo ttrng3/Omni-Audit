@@ -104,11 +104,12 @@ scan is clean only when this prints nothing at all (stdout or stderr) and exits 
 any other result aborts, including an unreadable run html or a missing `perl` (on a
 Mac, test it with `/usr/bin/grep`: the shell's `grep` there is a ugrep wrapper that
 matches differently):
-`perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{(?<![\w/])(?<![\w/][.-])(?:red/amber/green|pass/fail/skip)(?![\w/]|[.-][\w/])}{ }gi; print }' <run html> > /tmp/omni-audit-scan.txt && grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' /tmp/omni-audit-scan.txt`
+`perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{(?<![\w/])(?<![\w/][.-])(?:red/amber/green|pass/fail/skip)(?![\w/]|[.-][\w/])}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' /tmp/omni-audit-scan.txt`
 The `perl` step removes the exempt phrases, exact whole phrases in its `(?:…)` group,
 and only where they stand alone: a phrase inside a path or a file name is kept, so the
 path still aborts. The same list is kept as `EXEMPT` in `tools/verify_live.py`; the two
-must match, and adding a phrase is a PR that edits both.
+must match, and adding a phrase is a PR that edits both. Keep the quotes around the
+run html's path: a path with a space would otherwise abort the scan.
 A bare extension in prose is fine. Counts stay; names and finding details go:
 a folder's bare name cannot be grepped, so read the tiles, watchlist, action
 plan and decision box for one. The 2026-09-12 run once named its Drive

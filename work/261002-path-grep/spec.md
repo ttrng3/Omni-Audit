@@ -14,18 +14,17 @@
 5. The scoreboard check in `tools/verify_live.py`, which carries its own copy of the pattern (`PATHISH`), applies the same list the same way.
 
 ## Design
-- **The list.** One line in the runbook's "Sanitisation" section, and the same list as `EXEMPT` in `tools/verify_live.py`. It starts with one phrase: `red/amber/green`, the page's own RAG wording, matched case-insensitively.
-  - Phrases with one slash ("pass/fail") need no entry, because the folder rule needs two slashes.
-  - The three published runs contain no two-slash phrase today (checked 2026-10-02).
-- **The runbook command.** The `grep` line stays byte for byte. In front of it, one `perl` stage removes the listed phrases where they stand alone:
+- **The list.** Exact whole phrases, matched case-insensitively: `red/amber/green` (the page's RAG wording) and `pass/fail/skip` (named in the intent). They're kept in two copies that must match: the runbook's `perl` group and `EXEMPT` in `tools/verify_live.py`. The three published runs contain no two-slash phrase today (checked 2026-10-02).
+- **Standing alone.** A phrase is removed only when no letter, digit or `/` touches it, and no `.` or `-` followed by a letter or `/` follows it (or precedes it after a letter or `/`). So a phrase can't lend its slashes to a path or a file name: "red/amber/green.md" and "Audit/red/amber/green/" still abort. `-CSD` and `\w` make a Vietnamese letter count as a letter in perl, as it does in Python.
+- **The runbook command.** No pipe. `perl` opens the run html itself and dies if it can't, writes the cleaned text to a temp file, and the unchanged `grep` runs on it only after (`&&`):
   ```
-  perl -CSD -pe 's{(?<![\w/])(?:red/amber/green)(?![\w/])}{ }gi' <run html> | grep -niE '<the pattern, unchanged>'
+  perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{…}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '<the pattern, unchanged>' /tmp/omni-audit-scan.txt
   ```
-  - `perl` is on the cloud image and the Mac, and behaves the same on both. `-CSD` and `\w` make a Vietnamese letter count as a letter, as it does in Python (corrected at build time, 2026-10-02; the draft said `[[:alnum:]]`, which perl reads byte by byte).
-  - `sed`'s case flag is GNU-only, and the Mac's shell `grep` is a ugrep wrapper. That's why the runbook also says to test the line with `/usr/bin/grep` on a Mac.
-  - "Clean" stays the same: the line prints nothing and exits 1.
-- **`tools/verify_live.py`.** `EXEMPT = ["red/amber/green"]` and one compiled regex with the same boundaries. The text is stripped before `PATHISH` counts, and `PATHISH` itself is unchanged.
-- **`verification/scoreboard.md`.** One line under Traps naming the exemption list, and the Mac `grep` trap.
+  - **"Clean"** is no output at all (stdout or stderr) and exit 1. An unreadable file (rc 2) or a missing `perl` (rc 127) aborts.
+  - **Quoting.** The path is quoted, so a space in it can't break the scan.
+  - **Mac note.** On a Mac, test with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper.
+- **`tools/verify_live.py`.** `EXEMPT` plus one compiled regex with the same boundaries, applied before `PATHISH` counts. `PATHISH` is unchanged.
+- **`verification/scoreboard.md`.** Traps: the two lists, the clean rule, the Mac `grep`. Sanctioned substitutes: a listed phrase wrapped in markup inside a path is not caught (the same blind spot as any tag-split path).
 - **To add a phrase later:** one PR that edits both lists, with Ty's ship. No catch-all patterns.
 
 ## Ty's checks
@@ -63,25 +62,23 @@ Verdict: safe to ship; the change narrows nothing but one named phrase
 ```
 
 ## Promise
-Run on the branch.
-1. **The runbook line itself.** The `perl | /usr/bin/grep` line, copied from the runbook, runs on a fixed file of test lines.
-   - **Each of these must hit:**
-     - the real Drive path "93 Knowledge Base/Claude outputs/Audit/";
-     - "Audit/red/amber/green/";
-     - "red/amber/green/Audit/x/";
-     - "red/amber/green 93 Knowledge Base/Claude outputs/Audit/" (a path next to the phrase);
-     - "(Red/Amber/Green) Claude outputs/Audit/";
-     - "/Users/someone", "~/notes", "report.md".
-   - **Each of these must pass:**
-     - "red/amber/green";
-     - "Pillars: Red/Amber/Green.";
-     - "(red/amber/green)";
-     - "82/100";
-     - "01/10/2026".
-2. **The other two alternatives are unchanged.** `git diff` on the runbook shows the `grep` pattern string unchanged, and `PATHISH` in `verify_live.py` unchanged. The file-name and `/Users/`/`/home/`/`~/` test lines hit with and without the `perl` stage.
-3. **`verify_live.py`.** The same test lines give the same hit or pass through its function as through the runbook line.
-4. **The three published runs** still scan clean. `verify_live.py` on the branch exits 0.
-5. **Then:** the reviewer, Ty's ship, and the verifier on `main`.
+Run on the branch, with the runbook's line taken from the file and run as written using `/usr/bin/grep`.
+1. **Must abort:**
+   - the real Drive path "93 Knowledge Base/Claude outputs/Audit/";
+   - "Audit/red/amber/green/" and "red/amber/green/Audit/x/";
+   - a path next to "red/amber/green" and next to "(Red/Amber/Green)";
+   - "red/amber/green.md", "red/amber/green-x/" and "x.red/amber/green/y/";
+   - "Audit/pass/fail/skip/";
+   - "/Users/someone", "~/notes" and "report.md".
+2. **Must be clean:**
+   - "red/amber/green", "Pillars: Red/Amber/Green.", "(red/amber/green)" and "Tổng: red/amber/green.";
+   - "PASS/FAIL/SKIP" and "guardrails pass/fail/skip: 3/0/0";
+   - "82/100" and "01/10/2026".
+3. **Failure paths abort:** a missing run html, and a missing `perl`. A run html whose path has a space scans normally.
+4. **The other two alternatives are unchanged:** the `grep` pattern is byte-identical to main's, and no `PATHISH` line changed.
+5. **Agreement:** `verify_live.py`'s function agrees with the runbook on every line.
+6. **The three published runs** scan clean. `verify_live.py --forbid …` on the branch exits 0.
+7. **Then:** the reviewer, Ty's ship, and the verifier on `main`.
 
 ## Out of scope
 - Folder names without a slash (read by eye, as the runbook already says).
