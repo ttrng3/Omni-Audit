@@ -93,3 +93,9 @@ Run on the branch, with the runbook's line taken from the file and run as writte
 - Folder names without a slash (read by eye, as the runbook already says).
 - Any change to the secret list.
 - Any change to the routine prompts.
+
+## Follow-up after merge (review on the merged code, 2026-10-03)
+Ty asked for a review of d554fe3 before shipping; his message arrived after the merge (ea40908, identical tree), so the review ran on the merged code. Its two Mediums are fixed in a follow-up PR, under this folder:
+- The runbook now says what `<run html>` is: a file on disk with the html exactly as published (not JSON-escaped, not a pipe or `/dev/stdin`).
+- `verify_live.py` gains `exempt_lists_match`, which fails unless the runbook's perl phrases equal `EXEMPT`; checked both ways on the branch.
+Its Lows: the PR #9 description's `set -e` line was stale and is removed; the `CLAUDE.md` scope wording ("each run's html, one file at a time") is recorded here as part of the design.
