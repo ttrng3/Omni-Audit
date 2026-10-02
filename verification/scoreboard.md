@@ -50,7 +50,7 @@ All of them must be true.
 - The manifest's `pages` and `repo` keys are left out of the sanitisation scan: they hold the public addresses themselves.
 - A folder's bare name (a word like "Legal" with no slash) cannot be told from prose by a pattern, so `runs_sanitised` catches paths and file names only; folder names are read by eye in the run's tiles and watchlist.
 - The preview cannot be fetched by a script, so step 4 is done by the runner with `Artifact list` and `Artifact read`.
-- A listed exempt phrase wrapped in markup inside a path (`Audit/<b>red/amber/green</b>/x/`) is removed, so that path is not caught. Counting `<`/`>` as part of a path would make every `<td>red/amber/green</td>` abort instead. It is the same blind spot the scan already has for any path split by a tag (02/10).
+- A listed exempt phrase wrapped in markup inside a path (`Audit/<b>red/amber/green</b>/x/`) is removed, so that path is not caught. Counting `<`/`>` as part of a path would make every `<td>red/amber/green</td>` abort instead. It is the same blind spot the scan already has for any path split by a tag. Punctuation alone does not hide a path: a phrase with `/` one punctuation mark away (`Audit/(red/amber/green)`) is kept (02/10).
 
 ## Evidence
 

@@ -15,7 +15,7 @@
 
 ## Design
 - **The list.** Exact whole phrases, matched case-insensitively: `red/amber/green` (the page's RAG wording) and `pass/fail/skip` (named in the intent). They're kept in two copies that must match: the runbook's `perl` group and `EXEMPT` in `tools/verify_live.py`. The three published runs contain no two-slash phrase today (checked 2026-10-02).
-- **Standing alone.** A phrase is removed only when no letter, digit or `/` touches it, and no `.` or `-` followed by a letter or `/` follows it (or precedes it after a letter or `/`). So a phrase can't lend its slashes to a path or a file name: "red/amber/green.md" and "Audit/red/amber/green/" still abort. `-CSD` and `\w` make a Vietnamese letter count as a letter in perl, as it does in Python.
+- **Standing alone.** A phrase is removed only when no letter, digit or `/` touches it, and no `.` or `-` followed by a letter or `/` follows it (or precedes it after a letter or `/`), and no `/` sits one punctuation mark away on either side ("Audit/(red/amber/green)"). So a phrase can't lend its slashes to a path or a file name: "red/amber/green.md" and "Audit/red/amber/green/" still abort. `-CSD` and `\w` make a Vietnamese letter count as a letter in perl, as it does in Python.
 - **The runbook command.** No pipe. `perl` opens the run html itself and dies if it can't, writes the cleaned text to a temp file, and the unchanged `grep` runs on it only after (`&&`):
   ```
   perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{…}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '<the pattern, unchanged>' /tmp/omni-audit-scan.txt
