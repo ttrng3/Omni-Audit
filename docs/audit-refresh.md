@@ -104,7 +104,7 @@ scan is clean only when this prints nothing at all (stdout or stderr) and exits 
 any other result aborts, including an unreadable run html or a missing `perl` (on a
 Mac, test it with `/usr/bin/grep`: the shell's `grep` there is a ugrep wrapper that
 matches differently):
-`r=; t=$(mktemp) && perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{\b(?:red/amber/green|pass/fail/skip)\b}{RAG}gi; print }' "<run html>" > "$t" && { grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' "$t"; r=$?; } || r=${r:-2}; rm -f "$t"; (exit $r)`
+`r=; t=$(mktemp) && perl -CSD -e 'my $p = shift; -f $p or die "scan input: not a file\n"; open(my $f, "<", $p) or die "scan input: $!\n"; while (<$f>) { s{\b(?:red/amber/green|pass/fail/skip)\b}{RAG}gi; print }' "<run html>" > "$t" && { grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' "$t"; r=$?; } || r=${r:-2}; rm -f "$t"; (exit $r)`
 The `perl` step replaces each exempt phrase, exact, whole (word-bounded) and in any case, with the word `RAG`,
 so a phrase's own slashes never count toward a path; everything else is scanned exactly
 as before. The same list is kept as `EXEMPT` in `tools/verify_live.py`; the two must

@@ -17,9 +17,9 @@
 ## Design
 - **The runbook line.** No pipe:
   ```
-  t=$(mktemp) && perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{\b(?:red/amber/green|pass/fail/skip)\b}{RAG}gi; print }' "<run html>" > "$t" && { grep -niE '<the pattern, unchanged>' "$t"; r=$?; } || r=${r:-2}; rm -f "$t"; (exit $r)
+  r=; t=$(mktemp) && perl -CSD -e 'my $p = shift; -f $p or die "scan input: not a file\n"; open(my $f, "<", $p) or die "scan input: $!\n"; while (<$f>) { s{\b(?:red/amber/green|pass/fail/skip)\b}{RAG}gi; print }' "<run html>" > "$t" && { grep -niE '<the pattern, unchanged>' "$t"; r=$?; } || r=${r:-2}; rm -f "$t"; (exit $r)
   ```
-  - `perl` dies if it can't open the file.
+  - `perl` dies unless the input is a readable regular file (a directory is refused).
   - The temp file is fresh and is removed after the result is read.
   - The path is quoted, so a space in it can't break the scan.
   - A failure before `grep` (no temp file, an unreadable run html) exits 2, never the clean code 1.
