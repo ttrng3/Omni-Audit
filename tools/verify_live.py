@@ -162,6 +162,15 @@ def main():
         if n_sec or n_path:
             info["sanitisation_hits"][name] = {"secrets": n_sec, "paths_or_files": n_path}
     v["runs_sanitised"] = not info["sanitisation_hits"]
+    # The runbook's perl step and EXEMPT must name the same phrases (runbook "Sanitisation").
+    try:
+        runbook = (ROOT / "docs/audit-refresh.md").read_text(encoding="utf-8")
+    except OSError:
+        runbook = ""
+    lines = [ln for ln in runbook.splitlines() if ln.startswith("`r=; t=$(mktemp) && perl")]
+    m = re.search(r"s\{\\b\(\?:(.*?)\)\\b\}\{RAG\}gi", lines[0]) if len(lines) == 1 else None
+    info["runbook_exempt"] = m.group(1).split("|") if m else None
+    v["exempt_lists_match"] = info["runbook_exempt"] == [re.escape(p) for p in EXEMPT] or info["runbook_exempt"] == EXEMPT
 
     served = ["index.html", "data/index.json"] + [f"data/runs/{i}.json" for i in files]
     for p in served:
