@@ -35,7 +35,7 @@ PATHISH = re.compile(r'[^ ./<>"]+\.(?:md|json|py|xlsx?|csv|html?|js|txt|pdf|docx
 # Exact phrases the path scan neutralises (runbook "Sanitisation", its perl step): each is replaced by the word RAG,
 # so its own slashes never count toward a path. Must match the runbook's list; a new phrase edits both.
 EXEMPT = ["red/amber/green", "pass/fail/skip"]
-EXEMPT_RE = re.compile("|".join(map(re.escape, EXEMPT)), re.I)
+EXEMPT_RE = re.compile(r"\b(?:" + "|".join(map(re.escape, EXEMPT)) + r")\b", re.I)   # whole phrases only: never inside a longer word
 # The one sanctioned edit to a past run (Ty, 2026-10-01, #7): the 2026-09-12 html may equal its first commit or
 # exactly this redacted text (sha256), nothing else.
 SANCTIONED_EDITS = {"2026-09-12": {"html": "d0e4434c669605e274a2f31c69d1edc865b8dbe6dbf6ca61ad4e360f98953ec4"}}

@@ -7,7 +7,7 @@
 **Intent:** accepted 2026-10-02 · **Status:** approved
 
 ## Requirements
-1. Before the path scan, each exempt phrase is replaced by the word `RAG`. The phrases are exact and matched in any case, kept in one list per copy: `red/amber/green`, `pass/fail/skip` (intent, answer (a); the intent's Outcome).
+1. Before the path scan, each exempt phrase is replaced by the word `RAG`. The phrases are exact whole phrases (word-bounded, so never part of a longer word such as "Covered/Amber/Green") and matched in any case, kept in one list per copy: `red/amber/green`, `pass/fail/skip` (intent, answer (a); the intent's Outcome).
 2. A phrase's own slashes never count toward a path. Every other character is scanned exactly as before: the `grep` pattern is unchanged, and so is `PATHISH`.
 3. A path with two linked slashes of its own still aborts, whether it sits next to the phrase or around it (Ty, 2026-10-02).
 4. The scan fails safe: "clean" is no output at all (stdout or stderr) and exit 1, so an unreadable run html or a missing `perl` aborts.
@@ -17,14 +17,14 @@
 ## Design
 - **The runbook line.** No pipe:
   ```
-  t=$(mktemp) && perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{red/amber/green|pass/fail/skip}{RAG}gi; print }' "<run html>" > "$t" && grep -niE '<the pattern, unchanged>' "$t"; r=$?; rm -f "$t"; (exit $r)
+  t=$(mktemp) && perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{\b(?:red/amber/green|pass/fail/skip)\b}{RAG}gi; print }' "<run html>" > "$t" && { grep -niE '<the pattern, unchanged>' "$t"; r=$?; } || r=${r:-2}; rm -f "$t"; (exit $r)
   ```
   - `perl` dies if it can't open the file.
   - The temp file is fresh and is removed after the result is read.
   - The path is quoted, so a space in it can't break the scan.
-  - Run the line without `set -e`, because a clean `grep` exits 1.
+  - A failure before `grep` (no temp file, an unreadable run html) exits 2, never the clean code 1.
   - On a Mac, test with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper.
-- **`tools/verify_live.py`.** `EXEMPT` with the same two phrases. `EXEMPT_RE` is their plain alternation, case-insensitive. Each phrase is replaced by `RAG` on the raw string, then `text_of`, then `PATHISH`.
+- **`tools/verify_live.py`.** `EXEMPT` with the same two phrases. `EXEMPT_RE` is their alternation between word boundaries, case-insensitive. Each phrase is replaced by `RAG` on the raw string, then `text_of`, then `PATHISH`.
 - **`verification/scoreboard.md`.**
   - Sanctioned substitutes: one entry with the rule and the three accepted limits.
   - Limit 1 is still flagged after publish by `runs_sanitised`, because `verify_live.py` reads text with tags removed. It did the same on `main` for any tag-split path.
@@ -52,7 +52,7 @@ Not loaded: "ty-report-standard" and "apple-design". Nothing on the page changes
 
 | Rule (by name) | What in the design touches it | Resolution |
 |---|---|---|
-| Runbook "Sanitisation": a path or file name aborts the write | An exempt phrase is removed before the scan | Only exact whole phrases, never inside a path (requirement 2); the promise proves a neighbouring path still aborts |
+| Runbook "Sanitisation": a path or file name aborts the write | Each exempt phrase becomes `RAG` before the scan | Exact whole phrases only (word-bounded); a path around the phrase still aborts through its own slashes; the three cases where it doesn't are Ty's accepted limits |
 | Repo `CLAUDE.md` command line "Secret and path scan of `data/`: the runbook's own greps" | Its clean rule changes | Edited: "no output at all (stdout or stderr) and exit 1" |
 | "Past runs are never rewritten" | No run file changes | No conflict |
 | Artifact-mirror contract | The page and the preview are unchanged | No conflict |
@@ -68,7 +68,8 @@ Verdict: safe to ship; the scan ignores only the two named phrases' own slashes
 
 ## Promise
 Run on the branch, with the runbook's line taken from the file and run as written using `/usr/bin/grep`; `verify_live.py`'s function on the same lines.
-1. **Must abort, in both copies** (16 lines):
+1. **Must abort, in both copies** (19 lines):
+   - "Covered/Amber/Green/", "Bypass/Fail/Skip/" and "Scared/Amber/Greenhouse/" (the phrase inside a longer word is not exempt);
    - the real Drive path, and the same path next to the phrase on either side ("93 Knowledge Base/Claude outputs/Audit/ red/amber/green");
    - "(Red/Amber/Green) Claude outputs/Audit/";
    - "Audit/red/amber/green/", "red/amber/green/Audit/x/", "red/amber/green.md" and "x.red/amber/green/y/";
