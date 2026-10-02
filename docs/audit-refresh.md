@@ -100,8 +100,13 @@ Before writing, scan the run html for `github_pat_`, `ghp_`, `gho_`, `sk-`,
 a URL. A hit aborts the write.
 Also scan it for a folder path or a file name, and abort on a hit like a
 credential (the producer's handoff is fixed at the source, never here). The
-scan is clean when this prints nothing and exits 1:
-`grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/'`
+scan is clean when this prints nothing and exits 1 (on a Mac, test it with
+`/usr/bin/grep`: the shell's `grep` there is a ugrep wrapper that matches differently):
+`perl -CSD -pe 's{(?<![\w/])(?:red/amber/green)(?![\w/])}{ }gi' <run html> | grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/'`
+The `perl` stage removes the exempt phrases, exact whole phrases in its `(?:…)` group
+(one list, mirrored as `EXEMPT` in `tools/verify_live.py`), and only where they stand
+alone: a phrase inside a path is kept, so the path still aborts. Adding a phrase is a PR
+that edits both lists.
 A bare extension in prose is fine. Counts stay; names and finding details go:
 a folder's bare name cannot be grepped, so read the tiles, watchlist, action
 plan and decision box for one. The 2026-09-12 run once named its Drive

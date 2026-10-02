@@ -32,6 +32,10 @@ SECRETS = re.compile(r"github_pat_|ghp_|gho_|sk-|AKIA|AIza|xoxb-|xoxp-|-----BEGI
 # The runbook's own path grep (docs/audit-refresh.md "Sanitisation"), case-insensitive, plus a Windows drive path.
 PATHISH = re.compile(r'[^ ./<>"]+\.(?:md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[A-Z]:\\|'
                      r'[^/<>",+ \n][^/<>",+\n]*/[^/<>",+0-9 \n][^/<>",+\n]*/', re.I)
+# Exact whole phrases the path scan ignores (runbook "Sanitisation", its perl stage): removed only where they stand
+# alone, so one inside a path is kept and the path still counts. One list; adding a phrase edits this and the runbook.
+EXEMPT = ["red/amber/green"]
+EXEMPT_RE = re.compile(r"(?<![\w/])(?:" + "|".join(map(re.escape, EXEMPT)) + r")(?![\w/])", re.I)
 # The one sanctioned edit to a past run (Ty, 2026-10-01, #7): the 2026-09-12 html may equal its first commit or
 # exactly this redacted text (sha256), nothing else.
 SANCTIONED_EDITS = {"2026-09-12": {"html": "d0e4434c669605e274a2f31c69d1edc865b8dbe6dbf6ca61ad4e360f98953ec4"}}
@@ -154,7 +158,7 @@ def main():
     for name, o in sources.items():
         vals = list(strings(o))
         n_sec = sum(len(SECRETS.findall(x)) for x in vals)
-        n_path = sum(len(PATHISH.findall(text_of(x))) for x in vals)
+        n_path = sum(len(PATHISH.findall(EXEMPT_RE.sub(" ", text_of(x)))) for x in vals)
         if n_sec or n_path:
             info["sanitisation_hits"][name] = {"secrets": n_sec, "paths_or_files": n_path}
     v["runs_sanitised"] = not info["sanitisation_hits"]

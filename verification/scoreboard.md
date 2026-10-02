@@ -70,3 +70,4 @@ All of them must be true.
 - The browser tool refuses fetches with a query string, so step 2 fetches plain paths (01/10).
 - The run label sits in the page header, outside `#app`, and the page draws its hyphens as non-breaking (U+2011); step 2 reads the whole page and folds hyphens before comparing (01/10).
 - The runbook quotes `:password@` as an example of what to scan for; the trace check allows that one string by name.
+- The path scan ignores exact whole phrases listed in one place, mirrored in the runbook's `perl` stage and `EXEMPT` in `tools/verify_live.py` ("red/amber/green" on 02/10), and only where they stand alone; a listed phrase inside a path still counts. On a Mac, test the runbook's line with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper that matches neither the prose nor a real path (02/10).

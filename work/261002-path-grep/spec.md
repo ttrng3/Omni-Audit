@@ -17,9 +17,9 @@
   - The three published runs contain no two-slash phrase today (checked 2026-10-02).
 - **The runbook command.** The `grep` line stays byte for byte. In front of it, one `perl` stage removes the listed phrases where they stand alone:
   ```
-  perl -pe 's{(?<![[:alnum:]/])(?:red/amber/green)(?![[:alnum:]/])}{ }gi' <run html> | grep -niE '<the pattern, unchanged>'
+  perl -CSD -pe 's{(?<![\w/])(?:red/amber/green)(?![\w/])}{ }gi' <run html> | grep -niE '<the pattern, unchanged>'
   ```
-  - `perl` is on the cloud image and the Mac, and behaves the same on both.
+  - `perl` is on the cloud image and the Mac, and behaves the same on both. `-CSD` and `\w` make a Vietnamese letter count as a letter, as it does in Python (corrected at build time, 2026-10-02; the draft said `[[:alnum:]]`, which perl reads byte by byte).
   - `sed`'s case flag is GNU-only, and the Mac's shell `grep` is a ugrep wrapper. That's why the runbook also says to test the line with `/usr/bin/grep` on a Mac.
   - "Clean" stays the same: the line prints nothing and exits 1.
 - **`tools/verify_live.py`.** `EXEMPT = ["red/amber/green"]` and one compiled regex with the same boundaries. The text is stripped before `PATHISH` counts, and `PATHISH` itself is unchanged.
