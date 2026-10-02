@@ -1,6 +1,8 @@
 # Spec: path-grep
 
-**Intent:** accepted 2026-10-02 · **Status:** draft
+**Approved:** 2026-10-02 (Ty, in chat)
+
+**Intent:** accepted 2026-10-02 · **Status:** approved
 
 ## Requirements
 1. Before the path scan, remove each exempt phrase from the text. The exempt phrases are exact whole phrases, kept in one list (intent, answer (a)).
