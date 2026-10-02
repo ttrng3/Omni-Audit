@@ -104,7 +104,7 @@ scan is clean only when this prints nothing at all (stdout or stderr) and exits 
 any other result aborts, including an unreadable run html or a missing `perl` (on a
 Mac, test it with `/usr/bin/grep`: the shell's `grep` there is a ugrep wrapper that
 matches differently):
-`perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{(?<![\w/])(?<![\w/][.-])(?<!/[^\w\s])(?:red/amber/green|pass/fail/skip)(?![\w/]|[.-][\w/]|[^\w\s]/)}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' /tmp/omni-audit-scan.txt`
+`perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{(?<![\w/])(?<![\w/][.-])(?<!/[^\w\s])(?:red/amber/green|pass/fail/skip)(?![\w/]|[.-][\w/]|[^\w\s<]/)}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' /tmp/omni-audit-scan.txt`
 The `perl` step removes the exempt phrases, exact whole phrases in its `(?:…)` group,
 and only where they stand alone: a phrase inside a path or a file name is kept, so the
 path still aborts. The same list is kept as `EXEMPT` in `tools/verify_live.py`; the two

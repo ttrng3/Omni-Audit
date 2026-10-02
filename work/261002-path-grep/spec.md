@@ -15,7 +15,7 @@
 
 ## Design
 - **The list.** Exact whole phrases, matched case-insensitively: `red/amber/green` (the page's RAG wording) and `pass/fail/skip` (named in the intent). They're kept in two copies that must match: the runbook's `perl` group and `EXEMPT` in `tools/verify_live.py`. The three published runs contain no two-slash phrase today (checked 2026-10-02).
-- **Standing alone.** A phrase is removed only when no letter, digit or `/` touches it, and no `.` or `-` followed by a letter or `/` follows it (or precedes it after a letter or `/`), and no `/` sits one punctuation mark away on either side ("Audit/(red/amber/green)"). So a phrase can't lend its slashes to a path or a file name: "red/amber/green.md" and "Audit/red/amber/green/" still abort. `-CSD` and `\w` make a Vietnamese letter count as a letter in perl, as it does in Python.
+- **Standing alone.** A phrase is removed only when no letter, digit or `/` touches it, and no `.` or `-` followed by a letter or `/` follows it (or precedes it after a letter or `/`), and no `/` sits one punctuation mark away on either side ("Audit/(red/amber/green)"), except the `<` of a closing tag, so `<td>red/amber/green</td>` is still removed. `verify_live.py` removes the phrases from the raw html before `text_of`, as the runbook does. So a phrase can't lend its slashes to a path or a file name: "red/amber/green.md" and "Audit/red/amber/green/" still abort. `-CSD` and `\w` make a Vietnamese letter count as a letter in perl, as it does in Python.
 - **The runbook command.** No pipe. `perl` opens the run html itself and dies if it can't, writes the cleaned text to a temp file, and the unchanged `grep` runs on it only after (`&&`):
   ```
   perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{…}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '<the pattern, unchanged>' /tmp/omni-audit-scan.txt
@@ -69,14 +69,17 @@ Run on the branch, with the runbook's line taken from the file and run as writte
    - a path next to "red/amber/green" and next to "(Red/Amber/Green)";
    - "red/amber/green.md", "red/amber/green-x/" and "x.red/amber/green/y/";
    - "Audit/pass/fail/skip/";
-   - "/Users/someone", "~/notes" and "report.md".
+   - "/Users/someone", "~/notes" and "report.md";
+   - "Audit/(red/amber/green)", "Audit/'red/amber/green'", "(red/amber/green)/Audit/" and "Audit/\"pass/fail/skip\"";
+   - `<td>Audit/red/amber/green/x/</td>` and `<p>93 Knowledge Base/Claude outputs/Audit/</p>`.
 2. **Must be clean:**
+   - `<td>red/amber/green</td>`, `<b>Red/Amber/Green</b>`, `<li>pass/fail/skip</li>` and `<span class="rag">red/amber/green</span>: 4 pillars`;
    - "red/amber/green", "Pillars: Red/Amber/Green.", "(red/amber/green)" and "Tổng: red/amber/green.";
    - "PASS/FAIL/SKIP" and "guardrails pass/fail/skip: 3/0/0";
    - "82/100" and "01/10/2026".
 3. **Failure paths abort:** a missing run html, and a missing `perl`. A run html whose path has a space scans normally.
 4. **The other two alternatives are unchanged:** the `grep` pattern is byte-identical to main's, and no `PATHISH` line changed.
-5. **Agreement:** `verify_live.py`'s function agrees with the runbook on every line.
+5. **Agreement:** `verify_live.py`'s function agrees with the runbook on every line, HTML included. The known limit `Audit/<b>red/amber/green</b>/x/` is clean in both (Sanctioned substitutes).
 6. **The three published runs** scan clean. `verify_live.py --forbid …` on the branch exits 0.
 7. **Then:** the reviewer, Ty's ship, and the verifier on `main`.
 
