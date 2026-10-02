@@ -50,7 +50,7 @@ All of them must be true.
 - The manifest's `pages` and `repo` keys are left out of the sanitisation scan: they hold the public addresses themselves.
 - A folder's bare name (a word like "Legal" with no slash) cannot be told from prose by a pattern, so `runs_sanitised` catches paths and file names only; folder names are read by eye in the run's tiles and watchlist.
 - The preview cannot be fetched by a script, so step 4 is done by the runner with `Artifact list` and `Artifact read`.
-- A listed exempt phrase wrapped in markup inside a path (`Audit/<b>red/amber/green</b>/x/`) is removed, so that path is not caught, by the runbook's line or `verify_live.py` (both run 02/10); `main`'s plain grep would have caught it. Keeping it would make the phrase's most common form, directly before a closing tag (`<td>red/amber/green</td>`), abort every publish. Punctuation alone does not hide a path: a phrase with `/` one punctuation mark away (`Audit/(red/amber/green)`) is kept and the path aborts (02/10).
+- A listed exempt phrase wrapped in markup inside a path (`Audit/<b>red/amber/green</b>/x/`) is removed, so that path is not caught, by the runbook's line or `verify_live.py` (both run 02/10); `main`'s plain grep would have caught it. Keeping it would make the phrase's most common form, directly before a closing tag (`<td>red/amber/green</td>`), abort every publish. Punctuation alone does not hide a path: a phrase with `/` one punctuation mark away (`Audit/(red/amber/green)`) is kept and the path aborts. A slash written as an HTML entity beside the phrase (`Audit&#47;red/amber/green`) is the second known limit: it is not caught, where `main`'s grep caught it; refusing `&` would make `red/amber/green&nbsp;` abort (02/10).
 
 ## Evidence
 

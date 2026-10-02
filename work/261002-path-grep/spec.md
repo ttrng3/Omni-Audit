@@ -21,6 +21,7 @@
   perl -CSD -e 'open(my $f, "<", shift) or die "scan input: $!\n"; while (<$f>) { s{…}{ }gi; print }' "<run html>" > /tmp/omni-audit-scan.txt && grep -niE '<the pattern, unchanged>' /tmp/omni-audit-scan.txt
   ```
   - **"Clean"** is no output at all (stdout or stderr) and exit 1. An unreadable file (rc 2) or a missing `perl` (rc 127) aborts.
+  - **Temp file.** A fresh `mktemp` file, removed after the result is read; the line's own exit is grep's.
   - **Quoting.** The path is quoted, so a space in it can't break the scan.
   - **Mac note.** On a Mac, test with `/usr/bin/grep`: the shell's `grep` is a ugrep wrapper.
 - **`tools/verify_live.py`.** `EXEMPT` plus one compiled regex with the same boundaries, applied before `PATHISH` counts. `PATHISH` is unchanged.
@@ -79,7 +80,7 @@ Run on the branch, with the runbook's line taken from the file and run as writte
    - "82/100" and "01/10/2026".
 3. **Failure paths abort:** a missing run html, and a missing `perl`. A run html whose path has a space scans normally.
 4. **The other two alternatives are unchanged:** the `grep` pattern is byte-identical to main's, and no `PATHISH` line changed.
-5. **Agreement:** `verify_live.py`'s function agrees with the runbook on every line, HTML included. The known limit `Audit/<b>red/amber/green</b>/x/` is clean in both (Sanctioned substitutes).
+5. **Agreement:** `verify_live.py`'s function agrees with the runbook on every line, HTML included. Two known limits are clean in both, where `main` caught them (Sanctioned substitutes): a tag inside a path around the phrase (`Audit/<b>red/amber/green</b>/x/`) and an entity-encoded slash beside it (`Audit&#47;red/amber/green`).
 6. **The three published runs** scan clean. `verify_live.py --forbid …` on the branch exits 0.
 7. **Then:** the reviewer, Ty's ship, and the verifier on `main`.
 
