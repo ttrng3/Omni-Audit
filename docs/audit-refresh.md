@@ -100,8 +100,17 @@ Before writing, scan the run html for `github_pat_`, `ghp_`, `gho_`, `sk-`,
 a URL. A hit aborts the write.
 Also scan it for a folder path or a file name, and abort on a hit like a
 credential (the producer's handoff is fixed at the source, never here). The
-scan is clean when this prints nothing and exits 1:
-`grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/'`
+scan is clean only when this prints nothing at all (stdout or stderr) and exits 1;
+any other result aborts, including an unreadable run html or a missing `perl` (on a
+Mac, test it with `/usr/bin/grep`: the shell's `grep` there is a ugrep wrapper that
+matches differently):
+`r=; t=$(mktemp) && perl -CSD -e 'my $p = shift; -f $p or die "scan input: not a file\n"; open(my $f, "<", $p) or die "scan input: $!\n"; while (<$f>) { s{\b(?:red/amber/green|pass/fail/skip)\b}{RAG}gi; print }' "<run html>" > "$t" && { grep -niE '[^ ./<>"]+\.(md|json|py|xlsx?|csv|html?|js|txt|pdf|docx?|pptx?|gdoc|sh|ya?ml)\b|/Users/|/home/|~/|[^/<>",+ ][^/<>",+]*/[^/<>",+0-9 ][^/<>",+]*/' "$t"; r=$?; } || r=${r:-2}; rm -f "$t"; (exit $r)`
+The `perl` step replaces each exempt phrase, exact, whole (word-bounded) and in any case, with the word `RAG`,
+so a phrase's own slashes never count toward a path; everything else is scanned exactly
+as before. The same list is kept as `EXEMPT` in `tools/verify_live.py`; the two must
+match, and adding a phrase is a PR that edits both. Keep the quotes around the run
+html's path. A failure before `grep` (no temp file, an unreadable run html) exits 2. The limits
+this accepts are listed in `verification/scoreboard.md`, "Sanctioned substitutes".
 A bare extension in prose is fine. Counts stay; names and finding details go:
 a folder's bare name cannot be grepped, so read the tiles, watchlist, action
 plan and decision box for one. The 2026-09-12 run once named its Drive
