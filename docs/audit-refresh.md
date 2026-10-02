@@ -111,8 +111,8 @@ as before. The same list is kept as `EXEMPT` in `tools/verify_live.py`; the two 
 match (`verify_live.py` checks it), and adding a phrase is a PR that edits both.
 `<run html>` is a file on disk holding the html exactly as it will be published:
 `html.unescape` is not applied, and it is not JSON-escaped (never the `data/runs/*.json`
-file, never a pipe or `/dev/stdin`). Write the extracted fragment to a file and pass
-that path, in quotes. A failure before `grep` (no temp file, an unreadable run html) exits 2. The limits
+file, never a pipe or `/dev/stdin`). Write the extracted fragment to a `mktemp` file outside the
+checkout, pass that path in quotes, and delete it after the scan. A failure before `grep` (no temp file, an unreadable run html) exits 2. The limits
 this accepts are listed in `verification/scoreboard.md`, "Sanctioned substitutes".
 A bare extension in prose is fine. Counts stay; names and finding details go:
 a folder's bare name cannot be grepped, so read the tiles, watchlist, action
