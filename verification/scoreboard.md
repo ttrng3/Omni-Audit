@@ -20,7 +20,7 @@ Run on the Mac, never from a routine (runbook, "Verifying a run — never fetch 
 
 ## Invariants
 
-Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `current_month_published` (from 06:00 UTC on the 2nd, after the fallback's slot, `current` must be this month's run), `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` allows one key of one run to equal exactly #7's final redacted text, pinned by its sha256), `runs_sanitised` (and `exempt_lists_match`: the runbook's exempt phrases equal `EXEMPT`) (runbook "Sanitisation": no credential, folder path or file name in any string of any run file or the manifest), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
+Step 1 prints these verdicts, all of which must be true: `runs_well_formed`, `runs_newest_first_unique`, `current_is_newest`, `current_month_published` (from 06:00 UTC on the 2nd, after the fallback's slot, `current` must be this month's run), `run_files_match`, `scores_agree`, `runs_immutable` (each run file, parsed, equals its first committed version; `SANCTIONED_EDITS` allows one key of one run to equal exactly #7's final redacted text, pinned by its sha256), `runs_sanitised` (runbook "Sanitisation": no credential, folder path or file name in any string of any run file or the manifest), `exempt_lists_match` (the runbook's exempt phrases equal `EXEMPT`), `served_equals_main`, `private_not_served`, `heartbeat_fresh` (≤ 35 days, pipeline-wiring's watchdog for this monthly pipeline), `data_fresh` (≤ 45 days, `freshness.py`'s `MAX_DATA_AGE_DAYS` default), `all_tracked_read`, `no_personal_traces`, `no_drive_ids_tracked`, `no_preview_tags_tracked`, `no_forbidden_words`.
 
 Step 2, in the page (no query strings in the fetches: the browser tool blocks them):
 ```js
@@ -52,7 +52,7 @@ All of them must be true.
 - The preview cannot be fetched by a script, so step 4 is done by the runner with `Artifact list` and `Artifact read`.
 - **The path scan's three accepted limits** (Ty, 02/10). The scan replaces each exempt phrase (`red/amber/green`, `pass/fail/skip`) with the word `RAG`, so a phrase's own slashes never count; a path with two linked slashes of its own still aborts, next to the phrase or around it. Not caught, where `main` caught them only through the phrase:
   1. A tag inside a path around the phrase: `Audit/<b>red/amber/green</b>/x/`. The publish gate lets it through; `runs_sanitised` here still flags it, because `verify_live.py` reads the text with tags removed (as it did on `main` for any tag-split path).
-  2. A slash written as an HTML entity beside the phrase: `Audit&#47;red/amber/green`.
+  2. A slash written as an HTML entity, beside the phrase or anywhere (`Audit&#47;red/amber/green`, `Audit&#47;runs&#47;x&#47;`): the publish scan reads the html as published, entities undecoded. This was already so on `main`; `runs_sanitised` here still flags it after publish, because `verify_live.py` decodes entities (Ty, 03/10).
   3. A path that reaches two slashes only with the phrase's own: `Legal/Contracts red/amber/green`, `Audit/(red/amber/green)`, `red/amber/green-x/`.
 
 ## Evidence
